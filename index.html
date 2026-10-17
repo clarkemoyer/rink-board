@@ -60,6 +60,12 @@ h1 span{color:var(--red)}
 .pad .cut{margin-top:auto;font-family:var(--f-data);font-weight:600;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .pad .cut b{color:var(--cat);font-weight:700}
 .pad .cut.est::after{content:" · est.";opacity:.8}
+.pad{position:relative}
+.pad kbd{position:absolute;top:9px;right:9px;font-family:var(--f-data);font-weight:600;font-size:.75rem;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;text-transform:uppercase}
+.pad .name{padding-right:22px}
+@media (hover:none){.pad kbd{display:none}}
+.banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;padding:12px 14px;border:1px solid var(--blue);border-radius:10px;background:var(--crease)}
+.banner span{flex:1 1 240px;min-width:0}
 .foot{display:flex;align-items:center;gap:6px;padding:6px 8px;border-top:1px solid var(--line)}
 .mini{font-family:var(--f-data);font-weight:600;font-size:.82rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--ice);color:var(--ink);cursor:pointer;text-decoration:none;line-height:1.4}
 .mini.danger{color:var(--red);margin-left:auto}
@@ -113,9 +119,16 @@ footer p{margin:0}
     </div>
     <div class="controls">
       <button class="btn" id="editBtn" type="button" aria-pressed="false">Edit cuts</button>
+      <button class="btn" id="shareBtn" type="button">Share setup</button>
       <button class="btn" id="copyAll" type="button">Copy all links</button>
     </div>
   </header>
+
+  <div class="banner" id="banner" hidden>
+    <span id="bText">Load the cuts and added songs from this link? They replace the ones saved on this device.</span>
+    <button class="btn on" id="bLoad" type="button">Load</button>
+    <button class="btn" id="bSkip" type="button">Ignore</button>
+  </div>
 
   <div class="stage">
     <div class="screen"><div id="player"></div></div>
@@ -149,7 +162,8 @@ footer p{margin:0}
   <footer>
     <p>Tap a song and it plays from its start time in the player above, fades over the last half second, and stops at its end time. Tap another song to switch instantly, or Stop to cut it. On iPhone the very first play may need one tap on the video itself.</p>
     <p>This page has to be served over https (GitHub Pages, Netlify, your own site). Opened straight from a file on disk, YouTube refuses to play it with error 153.</p>
-    <p>Cuts marked "est." are starting points; open Edit cuts to nudge them a second at a time. Your changes are saved in this browser.</p>
+    <p>Cuts marked "est." are starting points; open Edit cuts to nudge them a second at a time. Your changes are saved in this browser; use Share setup to copy them to another phone or laptop.</p>
+    <p>On a keyboard, the key shown on each pad plays it and Space stops.</p>
   </footer>
 </div>
 
@@ -212,9 +226,9 @@ function clampCut(s,changed){
   else { if(s.e-s.s<3) s.s=Math.max(0,s.e-3); if(s.e-s.s>10) s.s=s.e-10; if(s.e<3){s.e=3;s.s=0;} }
 }
 
-function card(s){
+function card(s,key){
   const c=document.createElement('div');c.className='card';
-  c.innerHTML=`<a class="pad" target="_blank" rel="noopener"><span class="name"></span><span class="artist"></span><span class="cut"></span></a>
+  c.innerHTML=`<a class="pad" target="_blank" rel="noopener"><span class="name"></span><span class="artist"></span><span class="cut"></span>${key?`<kbd>${key}</kbd>`:''}</a>
   <div class="edit">
     <div class="step"><span>Start</span><button type="button" data-k="s" data-d="-1" aria-label="Start one second earlier">−</button><input data-k="s" inputmode="numeric" aria-label="Start time"><button type="button" data-k="s" data-d="1" aria-label="Start one second later">+</button></div>
     <div class="step"><span>End</span><button type="button" data-k="e" data-d="-1" aria-label="End one second earlier">−</button><input data-k="e" inputmode="numeric" aria-label="End time"><button type="button" data-k="e" data-d="1" aria-label="End one second later">+</button></div>
@@ -242,14 +256,16 @@ function card(s){
   sync();return c;
 }
 
+const KEYS='1234567890qwertyuiopasdfghjklzxcvbnm'.split('');
+const keyed=new Map();
 function render(){
-  const root=$('#zones');root.innerHTML='';
+  const root=$('#zones');root.innerHTML='';keyed.clear();let ki=0;
   ZONES.forEach(z=>{
     const list=all().filter(s=>s.z===z.id); if(!list.length) return;
     const sec=document.createElement('section');sec.className='zone';sec.style.setProperty('--cat',z.cat);
     sec.innerHTML=`<div class="zone-h"><h2></h2><span class="rule"></span></div><p></p><div class="pads"></div>`;
     sec.querySelector('h2').textContent=z.name;sec.querySelector('p').textContent=z.note;
-    const g=sec.querySelector('.pads');list.forEach(s=>g.appendChild(card(s)));root.appendChild(sec);
+    const g=sec.querySelector('.pads');list.forEach(s=>{const k=KEYS[ki++];const el=card(s,k);if(k)keyed.set(k,{s,el});g.appendChild(el);});root.appendChild(sec);
   });
   $('#sub').textContent=`${all().length} songs · tap to play the cut`;
   document.querySelectorAll('.reset').forEach(b=>b.hidden=!$('#app').classList.contains('editing'));
@@ -283,6 +299,30 @@ $('#aAdd').addEventListener('click',()=>{
 $('#editBtn').addEventListener('click',()=>{const on=$('#app').classList.toggle('editing');const b=$('#editBtn');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.textContent=on?'Done editing':'Edit cuts';
   document.querySelectorAll('.reset').forEach(x=>x.hidden=!on);});
 $('#copyAll').addEventListener('click',()=>copy(all().map(s=>`${s.name}${s.artist?' – '+s.artist:''} (${fmt(s.s)}–${fmt(s.e)}): ${url(s)}`).join('\n'),'Copied all links'));
+
+/* ---------- share setup between devices ---------- */
+const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const dec=t=>JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,'+').replace(/_/g,'/')))));
+$('#shareBtn').addEventListener('click',()=>{
+  const link=`${location.origin}${location.pathname}#setup=${enc({v:1,c:over,a:custom.map(({id,name,artist,vid,s,e,z})=>({id,name,artist,vid,s,e,z}))})}`;
+  copy(link,'Setup link copied. Open it on the other device and tap Load.');
+});
+let incoming=null;
+try{ const m=location.hash.match(/^#setup=([\w-]+)$/); if(m){ const d=dec(m[1]); if(d&&typeof d.c==='object'&&Array.isArray(d.a)) incoming=d; } }catch(e){}
+if(incoming){ const n=Object.keys(incoming.c).length, a=incoming.a.length;
+  $('#bText').textContent=`This link carries ${n} edited cut${n===1?'':'s'} and ${a} added song${a===1?'':'s'}. Load them? They replace the ones saved on this device.`;
+  $('#banner').hidden=false; }
+const clearHash=()=>{ try{history.replaceState(null,'',location.pathname+location.search);}catch(e){} $('#banner').hidden=true; };
+$('#bSkip').addEventListener('click',clearHash);
+$('#bLoad').addEventListener('click',()=>{
+  if(!incoming) return clearHash();
+  Object.keys(over).forEach(k=>delete over[k]);
+  SONGS.forEach(s=>{s.s=s.d0.s;s.e=s.d0.e;s.est=true;const o=incoming.c[s.id];if(o&&Number.isFinite(o.s)&&Number.isFinite(o.e)){over[s.id]={s:o.s,e:o.e};s.s=o.s;s.e=o.e;s.est=false;}});
+  custom.length=0;
+  incoming.a.forEach(x=>{ if(x&&/^[\w-]{11}$/.test(x.vid)&&Number.isFinite(x.s)&&Number.isFinite(x.e)) custom.push({id:String(x.id||('u'+Math.random().toString(36).slice(2,8))),name:String(x.name||'Untitled song').slice(0,40),artist:String(x.artist||'').slice(0,40),vid:x.vid,s:x.s,e:x.e,z:ZONES.some(z=>z.id===x.z)?x.z:'mine'}); });
+  save('rbc-cuts',over); save('rbc-added',custom);
+  clearHash(); render(); toast('Setup loaded');
+});
 
 /* ---------- in-page player ---------- */
 let player=null, ready=false, cur=null, curCard=null, timer=0, started=false;
@@ -318,7 +358,13 @@ window.__rbPlay=(s,card)=>{
   return true;
 };
 $('#stopBtn').addEventListener('click',stopCut); $('#fab').addEventListener('click',stopCut);
-addEventListener('keydown',e=>{ if((e.code==='Space'||e.key==='Escape')&&!(e.target.closest&&e.target.closest('input,select,textarea'))){ e.preventDefault(); stopCut(); } });
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
+  if(e.target.closest&&e.target.closest('input,select,textarea')) return;
+  if(e.code==='Space'||e.key==='Escape'){ e.preventDefault(); stopCut(); return; }
+  const k=keyed.get(e.key.toLowerCase());
+  if(k&&window.__rbPlay(k.s,k.el)){ e.preventDefault(); }
+});
 render();
 })();
 </script>
