@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1321">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>How to Use Rink Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --ice:#edf3f8; --boards:#ffffff; --ink:#13233b; --muted:#56687f; --line:#d2dce7;
+  --red:#c8102e; --blue:#1d4fc4; --gold:#9a6512; --green:#1d7a4a; --crease:#d6e7f6; --on-acc:#ffffff;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --ice:#0a1321; --boards:#122038; --ink:#e6edf6; --muted:#8fa2ba; --line:#233759;
+  --red:#ff4f61; --blue:#729fff; --gold:#f0b44c; --green:#4fd08e; --crease:#1b3459; --on-acc:#0a1321; color-scheme:dark }}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--ice);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:760px;margin:0 auto}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding-block:16px 12px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--f-display);font-weight:900;font-size:2rem;line-height:.95;text-transform:uppercase;letter-spacing:.01em;margin:0}
+h1 span{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-data);font-weight:700;font-size:1.05rem;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--boards);color:var(--ink);cursor:pointer;text-decoration:none;line-height:1.2}
+.btn.on{background:var(--ink);color:var(--ice);border-color:var(--ink)}
+.btn.go{background:var(--green);border-color:var(--green);color:var(--on-acc)}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--ice);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-block:10px;border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+nav.toc::-webkit-scrollbar{display:none}
+nav.toc a{flex:none;font-family:var(--f-data);font-weight:700;font-size:.98rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--boards);color:var(--ink);text-decoration:none;white-space:nowrap}
+section{padding-block:26px 6px}
+h2{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-weight:900;font-size:1.7rem;line-height:1;text-transform:uppercase;letter-spacing:.02em;margin:0 0 12px}
+h2::after{content:"";flex:1;height:4px;border-radius:2px;background:var(--cat,var(--blue))}
+h3{font-family:var(--f-data);font-weight:700;font-size:1.25rem;margin:18px 0 6px}
+p{margin:0 0 10px}
+ul,ol{margin:0 0 10px;padding-left:22px}
+li{margin:4px 0}
+.lead{font-size:1.05rem;color:var(--muted);margin:14px 0 0}
+.callout{border:2px solid var(--red);border-radius:12px;background:var(--boards);padding:14px 16px;margin:16px 0 4px}
+.callout b.big{display:block;font-family:var(--f-display);font-weight:900;font-size:1.45rem;text-transform:uppercase;letter-spacing:.02em;color:var(--red);line-height:1.05;margin-bottom:6px}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--boards);padding:14px 16px;margin:10px 0}
+.check{list-style:none;padding:0}
+.check li{position:relative;padding-left:32px;margin:10px 0}
+.check li::before{content:"";position:absolute;left:0;top:2px;width:20px;height:20px;border:2px solid var(--muted);border-radius:5px}
+.when{font-family:var(--f-data);font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 2px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.ok{border-left:5px solid var(--green)}
+.no{border-left:5px solid var(--red)}
+.tag{display:inline-block;font-family:var(--f-data);font-weight:700;font-size:.85rem;padding:0 9px;border-radius:999px;line-height:1.6;vertical-align:1px}
+.t-green{background:var(--green);color:var(--on-acc)}
+.t-plain{background:var(--crease);color:var(--ink)}
+.t-dim{background:var(--crease);color:var(--ink);opacity:.45}
+.t-red{border:2px dashed var(--red);color:var(--red)}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:.98rem}
+th,td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-data);font-weight:700;color:var(--muted);font-size:.95rem}
+td:first-child{font-family:var(--f-data);font-weight:700;white-space:nowrap}
+form{display:grid;gap:12px}
+label{display:grid;gap:4px;font-family:var(--f-data);font-weight:700;font-size:1rem;min-width:0}
+label small{font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:.85rem}
+input,select,textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--ice);border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0;width:100%}
+textarea{min-height:70px;resize:vertical}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.preview{white-space:pre-wrap;font-size:.92rem;color:var(--muted);background:var(--ice);border:1px dashed var(--line);border-radius:8px;padding:10px;margin:0}
+.err{color:var(--red);margin:0;font-weight:600}
+.num{font-family:var(--f-data);font-weight:700;font-size:1.3rem;white-space:nowrap}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>How to use <span>Rink Board</span></h1>
+    <a class="btn on" href="./">&larr; Back to the board</a>
+  </header>
+  <p class="lead">Everything the person running sound needs: what to do before puck drop, how to avoid ads, what the pads mean, what the board can't do, and how to ask for a new song.</p>
+
+  <div class="callout" id="top-rule">
+    <b class="big">Use Chrome, signed in to YouTube Premium</b>
+    Run the board in <b>Chrome</b> on an <b>Android phone or a laptop</b>, signed in to youtube.com with your <b>YouTube Premium</b> account (the paid one with no ads). Any other setup can play a YouTube ad in the middle of the game. <b>iPhones and Safari will show ads even with Premium.</b> See <a href="#ads">Ads and browsers</a>.
+  </div>
+
+  <nav class="toc" aria-label="On this page">
+    <a href="#prep">Before the game</a>
+    <a href="#ads">Ads &amp; browsers</a>
+    <a href="#during">During the game</a>
+    <a href="#pads">Reading the pads</a>
+    <a href="#limits">Limitations</a>
+    <a href="#request">Request a song</a>
+  </nav>
+
+  <section id="prep" style="--cat:var(--blue)">
+    <h2>Before the game</h2>
+
+    <p class="when">The night before (10 minutes)</p>
+    <ul class="check">
+      <li><b>Pick the device.</b> Use an Android phone or a laptop with Chrome. Avoid an iPhone if you can (it shows ads; see <a href="#ads">why</a>).</li>
+      <li><b>Sign in to YouTube in Chrome.</b> Go to youtube.com in Chrome and sign in with your YouTube Premium account. Play any video: no ad means you're set. Don't use an Incognito tab.</li>
+      <li><b>Open the board in that same Chrome</b> and install it: tap the board's <b>Install</b> button, or Chrome menu <b>&#8942;</b> &rsaquo; <b>Install app</b> / <b>Add to Home screen</b>. Once it's installed, the board opens even with no signal.</li>
+      <li><b>Run the pre-game check:</b> Tools &rsaquo; <b>Pre-game check</b>. It test-plays every video on this device (sound muted). Any pad that won't play gets a red dashed outline. Skip those during the game.</li>
+      <li><b>Hear the backups.</b> Tap <b>Edit cuts</b>, then <b>Hear backup</b> on Offside and Icing. If the rink signal drops, those two play a built-in sound instead of the song, so you know what to expect.</li>
+      <li><b>Optional: load music files you own.</b> Tools &rsaquo; <b>Load music files for offline</b>. Pick MP3/M4A files whose names include the song title; matching pads turn green and play with no internet and no ads.</li>
+      <li><b>Charge the device</b> and pack the charger and an aux cable.</li>
+    </ul>
+
+    <p class="when">At the rink (30 minutes before puck drop)</p>
+    <ul class="check">
+      <li><b>Plug into the sound system.</b> Use an aux cable if you can. Bluetooth works, but adds a short delay between tap and sound.</li>
+      <li><b>Plug in the charger.</b> The board keeps the screen awake while it's open, which uses battery.</li>
+      <li><b>Turn on Do Not Disturb</b> so texts and calls don't play over the speakers.</li>
+      <li><b>Set volume:</b> phone volume all the way up, then set loudness on the arena mixer.</li>
+      <li><b>Tap the HORN</b> (bottom bar) once. That unlocks audio on the device and checks the speaker level.</li>
+      <li><b>Play one YouTube pad</b> for a few seconds. It confirms the rink signal works and that no ad plays.</li>
+      <li><b>Weak signal?</b> Tap <b>Offline</b> at the top. YouTube is skipped, and the horn, Offside, Icing and any green pads play instantly.</li>
+    </ul>
+  </section>
+
+  <section id="ads" style="--cat:var(--red)">
+    <h2>Ads &amp; browsers</h2>
+    <p>The board plays songs through YouTube's own player. YouTube skips ads only when it can tell <b>you're signed in to YouTube Premium in that browser</b>. If it can't tell, it may play an ad before or during a song, and an ad can hit at the worst moment.</p>
+    <div class="grid2">
+      <div class="card ok">
+        <h3 style="margin-top:0">Works: no ads</h3>
+        <ul>
+          <li><b>Chrome</b> on an <b>Android phone</b>, signed in to YouTube Premium</li>
+          <li><b>Chrome</b> on a <b>laptop or Chromebook</b>, signed in to YouTube Premium</li>
+          <li>The board installed from that same Chrome</li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3 style="margin-top:0">Shows ads</h3>
+        <ul>
+          <li><b>Any browser on iPhone or iPad</b>, including Chrome</li>
+          <li><b>Safari</b> on a Mac</li>
+          <li><b>Firefox</b></li>
+          <li>Any browser not signed in to YouTube Premium, or an Incognito/private tab</li>
+        </ul>
+      </div>
+    </div>
+    <h3>Why iPhone shows ads even in Chrome</h3>
+    <p>Apple makes every iPhone browser run on Safari's engine, and that engine blocks the sign-in cookie that YouTube's player needs inside another website. YouTube can't see your Premium membership, so it treats you as a viewer who gets ads. Safari on Mac and Firefox block it the same way.</p>
+    <h3>If you have to use an iPhone</h3>
+    <ul>
+      <li>The <b>horn</b>, the <b>Offside and Icing backups</b>, and any <b>green pads</b> (your own music files) never play ads.</li>
+      <li>For key moments, turn on <b>Offline</b>. Only ad-free sounds play.</li>
+      <li>Flip off the iPhone's silent switch, or the board makes no sound.</li>
+    </ul>
+    <h3>Still getting ads in Chrome?</h3>
+    <ol>
+      <li>Open youtube.com in the same Chrome and check that your profile picture shows (you're signed in).</li>
+      <li>Check that the membership is <b>YouTube Premium</b> and active at <a href="https://www.youtube.com/paid_memberships" target="_blank" rel="noopener">youtube.com/paid_memberships</a>. YouTube Music Premium alone doesn't remove video ads.</li>
+      <li>Make sure you're not in an Incognito tab.</li>
+      <li>Allow YouTube's cookies: Chrome menu &rsaquo; Settings &rsaquo; Privacy and security &rsaquo; Third-party cookies. Either allow them, or add <code>[*.]youtube.com</code> under "Allowed to use third-party cookies".</li>
+      <li>If you installed the board, it uses the Chrome profile you installed it from. Sign in to YouTube in that profile.</li>
+    </ol>
+  </section>
+
+  <section id="during" style="--cat:var(--green)">
+    <h2>During the game</h2>
+    <ul>
+      <li><b>Tap a pad</b> to play it. <b>Tap it again</b> or hit <b>Stop</b> to fade out; tap Stop twice to cut immediately. iPhone always stops immediately.</li>
+      <li>The <b>HORN</b> in the bottom bar is always one tap away and works with no internet.</li>
+      <li>Only one sound plays at a time. Tapping a new pad replaces the current one.</li>
+      <li><b>Period breaks:</b> tap one song and leave it. With "Auto-play the next break song" on, the board keeps going down the list until you hit Stop. Use <b>Next &#9656;</b> to skip.</li>
+      <li><b>Penalties are for either team.</b> At 10U the board stays neutral, so play the same songs for both sides.</li>
+      <li>Use the <b>Find a song</b> box or the section chips to jump around. Tap a section title to fold it away.</li>
+    </ul>
+  </section>
+
+  <section id="pads" style="--cat:var(--gold)">
+    <h2>Reading the pads</h2>
+    <table>
+      <thead><tr><th>You see</th><th>It means</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-plain">15s</span></td><td>How long the cut runs. "Full" = the whole song (period breaks).</td></tr>
+        <tr><td><span class="tag t-green">&#10003; 15s</span></td><td>Plays from your own music file: no internet, no ads.</td></tr>
+        <tr><td><span class="tag t-green">&#9889; 3s</span></td><td>Built-in backup sound (Offside/Icing) when there's no signal or Offline is on.</td></tr>
+        <tr><td><span class="tag t-dim">Dimmed</span></td><td>Needs internet; won't play right now.</td></tr>
+        <tr><td><span class="tag t-red">Red dashed</span></td><td>The pre-game check found this video won't play on this device. Skip it.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="limits" style="--cat:var(--muted)">
+    <h2>Limitations</h2>
+    <ul>
+      <li><b>Ads</b> unless you use Chrome signed in to YouTube Premium (see <a href="#ads">above</a>).</li>
+      <li><b>YouTube pads need internet.</b> On a weak signal the first second can lag. The horn, Offside/Icing backups and your own files don't need internet.</li>
+      <li><b>Videos can disappear.</b> A song's owner can remove a video or block it from playing on other sites. Run the pre-game check before every game.</li>
+      <li><b>Some cut start times are best guesses</b> (marked "est." in Edit cuts). Fix any that start in the wrong spot with <b>Set cut</b>.</li>
+      <li><b>Settings stay on one device.</b> Your saved cuts, favorites and added songs live in that browser. Use Tools &rsaquo; <b>Share setup</b> to copy them to another device.</li>
+      <li><b>On iPhone, the installed app keeps its own storage</b>, separate from Safari. Load your music files from inside the installed app.</li>
+      <li><b>One sound at a time.</b> No layering the horn over a goal song.</li>
+      <li><b>Bluetooth speakers add a short delay.</b> Use a cable for tight timing.</li>
+    </ul>
+  </section>
+
+  <section id="request" style="--cat:var(--red)">
+    <h2>Request a song</h2>
+    <p>Want a song added for everyone? Text it to <a class="num" href="sms:+15202228104">520-222-8104</a>. Fill this in and tap <b>Text this request</b>, and your phone opens a text with everything filled in.</p>
+    <div class="card">
+      <form id="req" novalidate>
+        <div class="row2">
+          <label>Song title<input id="rSong" required maxlength="80" autocomplete="off" placeholder="e.g. Eye of the Tiger"></label>
+          <label>Artist<input id="rArtist" maxlength="80" autocomplete="off" placeholder="e.g. Survivor"></label>
+        </div>
+        <label>Which section?
+          <select id="rZone">
+            <option value="">Choose a section&hellip;</option>
+            <option>Goal Songs: right after the horn</option>
+            <option>Hype: warm-ups, puck drop, dead time</option>
+            <option>Crowd: songs the stands chant or clap to</option>
+            <option>Penalties: plays for either team</option>
+            <option>Whistles: offside or icing</option>
+            <option>Period Breaks: full song at intermission</option>
+            <option>Not sure: you pick</option>
+          </select>
+        </label>
+        <label id="rPenL" hidden>Which call?
+          <select id="rPen">
+            <option>Any call</option><option>Tripping</option><option>Hooking</option><option>Holding</option><option>Slashing</option><option>Roughing</option><option>Boarding</option><option>Interference</option><option>High-sticking</option><option>Too many players</option><option>Misconduct</option>
+          </select>
+        </label>
+        <label>YouTube link <small>Optional, but it helps: paste the version you mean.</small><input id="rLink" type="url" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=&hellip;"></label>
+        <label id="rPartL">Which part to play <small>For short cues: "the chorus" or a time like 1:05.</small><input id="rPart" maxlength="80" autocomplete="off" placeholder="e.g. the chorus at 1:05"></label>
+        <label>Your name <small>Optional</small><input id="rName" maxlength="60" autocomplete="name"></label>
+        <p class="err" id="rErr" hidden></p>
+        <div class="actions">
+          <button class="btn go" type="submit">Text this request</button>
+          <button class="btn" type="button" id="rCopy">Copy text</button>
+        </div>
+        <p class="preview" id="rPrev" aria-live="polite"></p>
+      </form>
+    </div>
+    <h3>What gets added</h3>
+    <ul>
+      <li><b>Clean songs only.</b> This is a 10U game: no swearing and no drug or drinking references. Clean radio edits are fine.</li>
+      <li><b>Penalty songs stay neutral.</b> Nothing aimed at one team, a player, or the refs.</li>
+      <li>The song has to play from YouTube inside the board. Some official videos block that, and then we look for another version.</li>
+      <li>Game cues run 3 to 30 seconds. Period-break songs play in full.</li>
+    </ul>
+    <p>Need it today? You can add a song to your own device right now: on the board, tap <b>Edit cuts</b>, then use <b>Add a song</b> at the bottom. It only shows on that device until it's added for everyone.</p>
+  </section>
+
+  <footer>Rink Board &middot; <a href="./">Back to the board</a></footer>
+</div>
+<script>
+(()=>{
+  const $=s=>document.querySelector(s), NUM='+15202228104';
+  const zone=$('#rZone'), penL=$('#rPenL'), partL=$('#rPartL');
+  function body(){
+    const z=zone.value, pen=z.startsWith('Penalties');
+    const lines=['Rink Board song request',
+      `Song: ${$('#rSong').value.trim()||'?'}${$('#rArtist').value.trim()?' by '+$('#rArtist').value.trim():''}`,
+      `Section: ${z?z.split(':')[0]:'?'}${pen?' ('+$('#rPen').value+')':''}`];
+    if(!z.startsWith('Period')&&$('#rPart').value.trim()) lines.push(`Part: ${$('#rPart').value.trim()}`);
+    if($('#rLink').value.trim()) lines.push(`Link: ${$('#rLink').value.trim()}`);
+    if($('#rName').value.trim()) lines.push(`From: ${$('#rName').value.trim()}`);
+    return lines.join('\n');
+  }
+  function sync(){ penL.hidden=!zone.value.startsWith('Penalties'); partL.hidden=zone.value.startsWith('Period'); $('#rPrev').textContent=body(); }
+  $('#req').addEventListener('input',sync); zone.addEventListener('change',sync); sync();
+  function valid(){ const e=$('#rErr'); let m='';
+    if(!$('#rSong').value.trim()) m='Add the song title.'; else if(!zone.value) m='Choose a section.';
+    e.textContent=m; e.hidden=!m; return !m; }
+  $('#req').addEventListener('submit',ev=>{ ev.preventDefault(); if(!valid()) return;
+    location.href=`sms:${NUM}?&body=${encodeURIComponent(body())}`; });
+  $('#rCopy').addEventListener('click',async()=>{ if(!valid()) return; const b=$('#rCopy');
+    try{ await navigator.clipboard.writeText(body()); b.textContent='Copied: paste into a text to 520-222-8104'; }
+    catch(e){ b.textContent='Select the text below and copy it'; }
+    setTimeout(()=>{ b.textContent='Copy text'; },4000); });
+})();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 /* Rink Board offline cache: the app opens with no signal. Songs from YouTube still need internet. */
-const V = 'rink-board-v14';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const V = 'rink-board-v15';
+const CORE = ['./', './index.html', './help.html', './manifest.webmanifest', './icon.svg'];
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap';
 
 self.addEventListener('install', e => {
@@ -35,7 +35,7 @@ self.addEventListener('fetch', e => {
     // App files: answer from the phone instantly, refresh the saved copy in the background.
     // One cache entry per file (link parameters ignored); refreshes check with the server, not the browser cache.
     url.search = '';
-    const key = req.mode === 'navigate' ? new URL('./index.html', self.registration.scope).href : url.href;
+    const key = (req.mode === 'navigate' && (url.pathname.endsWith('/') || url.pathname.endsWith('/index.html'))) ? new URL('./index.html', self.registration.scope).href : url.href;
     e.respondWith((async () => {
       const c = await caches.open(V);
       const hit = await c.match(key);

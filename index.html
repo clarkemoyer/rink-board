@@ -251,6 +251,7 @@ footer p{margin:0}
       <button class="btn" id="editBtn" type="button" aria-pressed="false">Edit cuts</button>
       <details class="tools" id="tools"><summary class="btn">Tools ▾</summary>
         <div class="menu">
+          <a class="btn" href="help.html">How to use &amp; request a song</a>
           <button class="btn" id="offBtn" type="button">Offline &amp; install</button>
           <label class="btn" for="musicFiles">Load music files for offline…</label>
           <button class="btn" id="checkBtn" type="button">Pre-game check</button>
@@ -265,6 +266,12 @@ footer p{margin:0}
       </details>
     </div>
   </header>
+
+  <div class="banner" id="adNote" hidden>
+    <span><b>Ads may play in this browser.</b> For no ads, run the board in Chrome on an Android phone or laptop, signed in to YouTube Premium.</span>
+    <a class="btn on" href="help.html#ads">How to avoid ads</a>
+    <button class="btn" id="adX" type="button">Got it</button>
+  </div>
 
   <div class="banner" id="banner" hidden>
     <span id="bText">Load the cuts and added songs from this link?</span>
@@ -327,6 +334,7 @@ footer p{margin:0}
   </section>
 
   <footer>
+    <p><a href="help.html"><b>How to use the board, avoid ads, and request a song &rsaquo;</b></a></p>
     <p><b>Before the game:</b> install the board (Tools › Offline &amp; install) so it opens even with no signal, load your own music files so the key pads play offline (green pill = plays offline), and run Tools › Pre-game check on the phone you'll use. Offside and Icing fall back to built-in backup sounds when the signal fails; the Offline button at the top makes them (and every green pad) instant and skips YouTube. Turn on Do Not Disturb so texts don't go over the speakers. On iPhone, flip off silent mode.</p>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
     <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. "Open as YouTube playlist" opens that section's songs as one playlist on YouTube, where songs play in full rather than as cuts. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
@@ -1003,6 +1011,10 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   navigator.serviceWorker.ready.then(()=>{ swReady=true; if(!$('#offP').hidden) offRender(); });
 }
 netUI(); installUI();
+/* ads notice: YouTube can only see a Premium sign-in where the browser allows its cookies inside other sites (Chrome on Android/desktop) */
+try{ const ua=navigator.userAgent, chromium=!!(navigator.userAgentData&&navigator.userAgentData.brands.some(b=>/Chromium|Chrome/.test(b.brand)))||/Chrome\/\d/.test(ua);
+  if((IOS||!chromium)&&load('rbc-adnote',false)!==true){ $('#adNote').hidden=false; }
+  $('#adX').addEventListener('click',()=>{ $('#adNote').hidden=true; save('rbc-adnote',true); }); }catch(e){}
 try{ const c=document.createElement('canvas'); c.width=c.height=180; const g=c.getContext('2d'), k=180/512;
   g.scale(k,k); g.fillStyle='#c8102e'; g.fillRect(0,0,512,512); g.fillStyle='#fff'; g.font='700 150px Arial,Helvetica,sans-serif'; g.textAlign='center'; g.fillText('RB',256,216);
   g.fillStyle='#0a1321'; g.beginPath(); g.ellipse(256,340,150,40,0,0,Math.PI*2); g.fill(); g.fillRect(106,262,300,78);
