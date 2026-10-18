@@ -83,7 +83,7 @@ h1 span{color:var(--red)}
 .toggle input{width:20px;height:20px;accent-color:var(--cat)}
 
 .pads{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
-.card{display:grid;grid-template-rows:1fr auto;border:1px solid var(--line);border-radius:12px;background:var(--boards);overflow:hidden;min-width:0}
+.card{display:grid;grid-template-rows:1fr auto;grid-template-columns:minmax(0,1fr);border:1px solid var(--line);border-radius:12px;background:var(--boards);overflow:hidden;min-width:0}
 .pad{position:relative;display:flex;flex-direction:column;gap:3px;padding:14px 14px 16px;min-height:100px;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;transition:background-color .12s ease}
 .pad:hover{background:var(--crease)}
@@ -179,11 +179,44 @@ footer p{margin:0}
 .quick{margin:0;color:var(--muted);font-family:var(--f-data);font-weight:600;font-size:1rem}
 @media (min-width:900px){.pads{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.pad{min-height:112px}#z-whistle .pads{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:440px){h1{font-size:1.7rem}.pads{grid-template-columns:repeat(2,minmax(0,1fr))}.pad .name{font-size:1.15rem}.ce-fine{grid-template-columns:1fr}}
+/* compact phone layout: horn, whistles and the top penalties fit on one screen */
+#hintPlay{display:none!important}
+.stage:not(:has(.cuted:not([hidden]),.checkp:not([hidden]),#hintEdit:not([hidden]))){display:none}
+.checkp{position:relative;padding-right:44px}
+.checkp .x{position:absolute;top:6px;right:6px;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:1.4rem;cursor:pointer}
+#z-pen .pad .name{font-family:var(--f-display);font-weight:900;font-size:1.5rem;text-transform:uppercase;letter-spacing:.02em}
+.app-play .pad .cut{display:none}
+.app-play .card.bad .pad .cut{display:block}
+@media (max-width:600px){
+  .top{padding-block:8px;gap:8px}
+  h1{font-size:1.45rem}
+  .sub{display:none}
+  .btn{padding:6px 11px;font-size:.95rem}
+  .stage{padding-block:8px}
+  .jump{padding-block:6px}
+  .jump input{flex:0 1 120px;min-width:90px;padding:6px 10px;font-size:.95rem}
+  .chip{padding:5px 10px;font-size:.9rem}
+  .zone{gap:6px;padding-block:10px 0}
+  .zone-h h2{font-size:1.15rem}
+  .zone:not(#z-break) .znote{display:none}
+  .pads{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .pad{min-height:62px;padding:8px 10px 10px;gap:1px}
+  .pad .name{font-size:1.1rem;padding-right:42px}
+  .pad .artist{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pad .dur{top:7px;right:7px;font-size:.82rem;padding:0 6px}
+  #z-whistle .pad,#z-pen .pad{min-height:62px}
+  #z-whistle .pad .name,#z-pen .pad .name{font-size:1.25rem}
+  .zone.hero{padding-top:8px}
+  .zone.hero .pad{min-height:60px;padding:10px 16px;gap:10px}
+  .zone.hero .pad .name{font-size:2rem}
+  .zone.hero .pad .artist,.zone.hero .pad .cut{display:none}
+  .zone.hero .pad .dur{margin-left:auto}
+}
 @media (prefers-reduced-motion:reduce){.pad{transition:none}}
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
+<div class="wrap app-play" id="app">
   <header class="top">
     <div class="brand">
       <h1>Rink Board <span>Cuts</span></h1>
@@ -322,7 +355,7 @@ const SONGS=[
   C('tiger2','Eye of the Tiger','Survivor','S-LO6dctBms',0,16,'hype',R),
   C('thunder2','Thunder','Imagine Dragons','9ssQKlLxBdQ',19,34.5,'hype',Y),
   C('sevennation2','Seven Nation Army','The White Stripes','LqE0H-dYHlo',9,24,'crowd',L),
-  C('rockyou2','We Will Rock You','Queen','kVIHwEmE8io',21.5,33.5,'crowd',Y),
+  C('rockyou3','We Will Rock You','Queen','-tJYN-eG1zk',21.5,33.5,'crowd'),
   C('cottoneye2','Cotton Eye Joe','Rednex','fYnJZh5ZHIA',22,37,'crowd',L),
   C('dogs2','Who Let the Dogs Out','Baha Men','KYgK97aioNA',30,45,'crowd',L),
   C('p-trip2','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',6.5,31,'pen',{tag:'Tripping'}),
@@ -595,7 +628,7 @@ $('#aAdd').addEventListener('click',()=>{
 
 /* ---------- edit mode ---------- */
 $('#editBtn').addEventListener('click',()=>{
-  const on=$('#app').classList.toggle('editing'); const b=$('#editBtn');
+  const on=$('#app').classList.toggle('editing'); $('#app').classList.toggle('app-play',!on); const b=$('#editBtn');
   b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); b.textContent=on?'Done editing':'Edit cuts';
   if(!on&&mode==='mark') closeEditor();
   $('#hintEdit').hidden=!on||mode==='mark'; $('#hintPlay').hidden=on||mode==='mark';
@@ -725,11 +758,13 @@ $('#checkBtn').addEventListener('click',async()=>{
     if(res){ bad[s.vid]=res; fails.push(`${s.tag?s.tag+': ':''}${s.name} (${res})`); } else delete bad[s.vid];
   }
   save('rbc-bad',bad); player.unMute(); player.setVolume(100); mode='play'; render();
-  P.innerHTML=fails.length?`<b>${list.length-fails.length} of ${list.length} play. ${fails.length} problem${fails.length>1?'s':''}:</b><ul>${fails.map(f=>`<li></li>`).join('')}</ul><span class="hint">Problem pads are outlined in red. Swap the video with Edit cuts › Add a song, or skip them.</span>`
-    :`<b>All ${list.length} videos play on this device.</b><span class="hint">The horn is built in, so it doesn't need checking.</span>`;
+  P.innerHTML=`<button class="x" type="button" aria-label="Close">×</button>`+(fails.length?`<b>${list.length-fails.length} of ${list.length} play. ${fails.length} problem${fails.length>1?'s':''}:</b><ul>${fails.map(f=>`<li></li>`).join('')}</ul><span class="hint">Problem pads are outlined in red. Swap the video with Edit cuts › Add a song, or skip them.</span>`
+    :`<b>All ${list.length} videos play on this device.</b><span class="hint">The horn is built in, so it doesn't need checking.</span>`);
   if(fails.length) [...P.querySelectorAll('li')].forEach((li,i)=>li.textContent=fails[i]);
   setTimeout(()=>{ if(!fails.length) P.hidden=true; },8000);
 });
+
+$('#checkP').addEventListener('click',e=>{ if(e.target.closest('.x')) $('#checkP').hidden=true; });
 
 /* ---------- keyboard ---------- */
 addEventListener('keydown',e=>{
