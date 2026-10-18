@@ -191,7 +191,7 @@ footer p{margin:0}
 
   <footer>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
-    <p>Cuts marked "est." are starting guesses. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, and the right arrow skips to the next break song.</p>
+    <p>Cuts marked "cue list" start where published arena cue lists put the hook; "est." cuts are starting guesses to check by ear with Set cut. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, and the right arrow skips to the next break song.</p>
   </footer>
 </div>
 
@@ -208,33 +208,62 @@ footer p{margin:0}
 (()=>{
 const $=s=>document.querySelector(s);
 const ZONES=[
-  {id:'goal',name:'Goal',note:'Red light is on. Hit it the second the horn stops.',cat:'var(--red)'},
+  {id:'horn',name:'Goal Horns',note:'Arena horn recordings: the horn hits right away, then the team song kicks in.',cat:'var(--red)'},
+  {id:'goal',name:'Goal Songs',note:'Red light is on. Hit it the second the horn stops.',cat:'var(--red)'},
   {id:'hype',name:'Hype',note:'Warm-ups, puck drop, and dead time between whistles.',cat:'var(--blue)'},
   {id:'crowd',name:'Crowd',note:'Songs the stands chant or clap along to.',cat:'var(--ink)'},
-  {id:'pen',name:'Penalties',note:'Opponent heads to the box.',cat:'var(--gold)'},
+  {id:'pen',name:'Their Penalty',note:'Opponent heads to the box. Pick the song that matches the call.',cat:'var(--gold)'},
+  {id:'ours',name:'Our Penalty',note:'One of ours heads to the box.',cat:'var(--muted)'},
   {id:'break',name:'Period Breaks',note:'Full songs for intermission and the ice cut.',cat:'var(--green)',brk:true},
   {id:'mine',name:'Added songs',note:'Game cues you added.',cat:'var(--muted)'},
 ];
-const C=(id,name,artist,vid,s,e,z)=>({id,name,artist,vid,s,e,z,kind:'cue'});
+/* src: 'list' = start time from a published cue list (track timing); otherwise an estimate to check by ear */
+const C=(id,name,artist,vid,s,e,z,o={})=>({id,name,artist,vid,s,e,z,kind:'cue',...o});
 const B=(id,name,artist,vid,s=0)=>({id,name,artist,vid,s,e:null,z:'break',kind:'break'});
+const L={src:'list'};
 const SONGS=[
-  C('song2','Song 2','Blur','SSbBvKaM6sk',0,15,'goal'),
+  C('h-chi','Chicago Blackhawks','Horn + Chelsea Dagger','b8OLWEqEaJk',0,20,'horn'),
+  C('h-bos','Boston Bruins','Horn + Kernkraft 400','Y-PFYzmo_GU',0,20,'horn'),
+  C('h-pit','Pittsburgh Penguins','Horn + goal song','OmKnz-w1qyk',0,20,'horn'),
+  C('h-cbj','Columbus Blue Jackets','Horn + cannon','YTFo87lkf3E',0,20,'horn'),
+  C('h-det','Detroit Red Wings','Horn + goal song','EkKBEarP6Ow',0,20,'horn'),
+  C('h-min','Minnesota Wild','Horn + siren','Gw0LfN4PrDc',0,20,'horn'),
+  C('song2a','Song 2','Blur','SQrKCytWbj8',8,20,'goal',L),
+  C('chelsea','Chelsea Dagger','The Fratellis','sEXHeTcxQy4',24,39,'goal',L),
+  C('kernkraft','Kernkraft 400','Zombie Nation','48apI4bpnSo',63,78,'goal',L),
+  C('crowdchant','Crowd Chant','Joe Satriani','eoWtsVXPExs',8,23,'goal',L),
+  C('shipping','I\'m Shipping Up to Boston','Dropkick Murphys','pMgHX2dhVlE',29,44,'goal',L),
   C('jump','Jump Around','House of Pain','XhzpxjuwZy0',0,15,'goal'),
   C('brightside','Mr. Brightside','The Killers','gGdGFtwCNBE',0,15,'goal'),
   C('thunderstruck','Thunderstruck','AC/DC','v2AC41dglnM',15,30,'hype'),
-  C('sandstorm','Sandstorm','Darude','y6120QOlsfU',5,20,'hype'),
+  C('sandstorm2','Sandstorm','Darude','y6120QOlsfU',29,44,'hype',L),
   C('crazytrain','Crazy Train','Ozzy Osbourne','tMDFv5m18Pw',0,15,'hype'),
   C('sandman','Enter Sandman','Metallica','CD-E-LDc384',25,40,'hype'),
   C('jungle','Welcome to the Jungle',"Guns N' Roses",'o1tj2zJ2Wvg',30,45,'hype'),
   C('countdown','The Final Countdown','Europe','9jK-NcRmVcw',0,15,'hype'),
   C('tiger','Eye of the Tiger','Survivor','btPJPFnesV4',0,15,'hype'),
   C('thunder','Thunder','Imagine Dragons','fKopy74weus',35,50,'hype'),
-  C('sevennation','Seven Nation Army','The White Stripes','0J2QdDbelmY',0,15,'crowd'),
+  C('sevennation2','Seven Nation Army','The White Stripes','LqE0H-dYHlo',9,24,'crowd',L),
   C('rockyou','We Will Rock You','Queen','-tJYN-eG1zk',0,15,'crowd'),
-  C('cottoneye','Cotton Eye Joe','Rednex','mOYZaiDZ7BM',0,15,'crowd'),
-  C('dogs','Who Let the Dogs Out','Baha Men','ojULkWEUsPs',0,15,'crowd'),
-  C('bitesdust','Another One Bites the Dust','Queen','rY0WxgSXdEE',45,60,'pen'),
-  C('iceice','Ice Ice Baby','Vanilla Ice','rog8ou-ZepE',0,15,'pen'),
+  C('cottoneye2','Cotton Eye Joe','Rednex','fYnJZh5ZHIA',22,37,'crowd',L),
+  C('dogs2','Who Let the Dogs Out','Baha Men','KYgK97aioNA',30,45,'crowd',L),
+  C('p-icing','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',8,35,'pen',{tag:'Icing'}),
+  C('p-hook','Hooked on a Feeling','Blue Swede','vWO22LXBgZY',0,20,'pen',{tag:'Hooking'}),
+  C('p-hold','Hold the Line','Toto','htgr3pvBr-I',45,65,'pen',{tag:'Holding'}),
+  C('p-trip','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',0,20,'pen',{tag:'Tripping'}),
+  C('p-slash',"Sweet Child O' Mine","Guns N' Roses",'1w7OgIMMRc4',0,15,'pen',{tag:'Slashing'}),
+  C('p-rough','Bad to the Bone','George Thorogood','IyhJ69mD7xI',0,20,'pen',{tag:'Roughing'}),
+  C('p-fight','Kung Fu Fighting','Carl Douglas','hq5REevpSP8',10,30,'pen',{tag:'Fighting'}),
+  C('p-board','Crazy Train','Ozzy Osbourne','tMDFv5m18Pw',0,12,'pen',{tag:'Boarding'}),
+  C('p-unsport','Bad Reputation','Joan Jett','nO6YL09T8Fw',0,15,'pen',{tag:'Unsportsmanlike'}),
+  C('p-eject','Hit the Road Jack','Ray Charles','uSiHqxgE2d0',0,15,'pen',{tag:'Misconduct / ejected'}),
+  C('p-badboys','Bad Boys','Inner Circle','VJIPF87kgpQ',0,20,'pen',{tag:'Any call'}),
+  C('p-law','Breaking the Law','Judas Priest','7y7SgmxSX8A',38,55,'pen',{tag:'Any call'}),
+  C('p-jail','Jailhouse Rock','Elvis Presley','PpsUOOfb-vE',0,15,'pen',{tag:'Any call'}),
+  C('bitesdust','Another One Bites the Dust','Queen','rY0WxgSXdEE',45,60,'pen',{tag:'Any call'}),
+  C('o-help','Help!','The Beatles','MKUex3fci5c',0,12,'ours'),
+  C('o-stay','Should I Stay or Should I Go','The Clash','BN1WwnEDWAM',0,15,'ours'),
+  C('o-take',"We're Not Gonna Take It",'Twisted Sister','kJtmYHBG3cg',0,15,'ours'),
   B('dontstop',"Don't Stop Believin'",'Journey','1k8craCGpgs'),
   B('prayer',"Livin' on a Prayer",'Bon Jovi','lDK9QqIzhwk'),
   B('shutup','Shut Up and Dance','Walk the Moon','6JCLY0Rlx6Q'),
@@ -289,8 +318,8 @@ function card(s,key){
   const c=document.createElement('div');c.className='card';
   c.innerHTML=`<button class="pad" type="button"><span class="name"></span><span class="artist"></span><span class="cut"></span>${key?`<kbd>${key}</kbd>`:''}<span class="bar"></span></button><div class="foot"></div>`;
   const pad=c.querySelector('.pad'), foot=c.querySelector('.foot');
-  pad.querySelector('.name').textContent=s.name; pad.querySelector('.artist').textContent=s.artist||'';
-  pad.querySelector('.cut').innerHTML=cutText(s)+(s.est?' <span class="est">· est.</span>':'');
+  pad.querySelector('.name').textContent=s.tag||s.name; pad.querySelector('.artist').textContent=s.tag?`${s.name} · ${s.artist}`:(s.artist||'');
+  pad.querySelector('.cut').innerHTML=cutText(s)+(s.est?` <span class="est">· ${s.src==='list'?'cue list':'est.'}</span>`:'');
   pad.addEventListener('click',()=>{ if(cur&&cur.s===s) stopFade(); else play(s); });
   const mk=(txt,cls,fn)=>{const b=document.createElement('button');b.type='button';b.className='mini '+cls;b.textContent=txt;b.addEventListener('click',fn);foot.appendChild(b);return b;};
   mk('Set cut','prime',()=>openEditor(s));
@@ -349,7 +378,7 @@ function play(s){
   player.setVolume(100); player.unMute();
   const o={videoId:s.vid,startSeconds:s.s}; if(s.e!=null) o.endSeconds=s.e;
   player.loadVideoById(o);
-  $('#tName').textContent=`▶ ${s.name}`; $('#tTime').textContent='Starting…';
+  $('#tName').textContent=`▶ ${s.tag?s.tag+': ':''}${s.name}`; $('#tTime').textContent='Starting…';
   $('#tStop').disabled=false; $('#tNext').hidden=s.kind!=='break';
   timer=setInterval(tick,100);
 }
