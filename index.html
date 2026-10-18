@@ -286,12 +286,11 @@ const $=s=>document.querySelector(s);
 const ZONES=[
   {id:'horn',name:'Goal Horn',note:'Built-in horn. Plays instantly and works offline.',cat:'var(--red)',hero:true},
   {id:'whistle',name:'Whistles',note:'Offside and icing, the two most common whistles. The pill shows how long each one runs.',cat:'var(--blue)'},
+  {id:'pen',name:'Penalties',note:'For either team. Most common calls first; "Any call" songs fit anything.',cat:'var(--gold)'},
   {id:'fav',name:'Favorites',note:'Your go-to songs for this game. Star songs in Edit mode to pin them here.',cat:'var(--blue)'},
   {id:'goal',name:'Goal Songs',note:'Right after the horn.',cat:'var(--red)'},
   {id:'hype',name:'Hype',note:'Warm-ups, puck drop, and dead time between whistles.',cat:'var(--blue)'},
   {id:'crowd',name:'Crowd',note:'Songs the stands chant or clap along to.',cat:'var(--ink)'},
-  {id:'pen',name:'Their Penalty',note:'Opponent heads to the box. Pick the song that matches the call.',cat:'var(--gold)'},
-  {id:'ours',name:'Our Penalty',note:'One of ours heads to the box.',cat:'var(--muted)'},
   {id:'break',name:'Period Breaks',note:'Full songs for intermission and the ice cut.',cat:'var(--green)',brk:true},
   {id:'mine',name:'Added songs',note:'Game cues you added.',cat:'var(--muted)'},
 ];
@@ -326,20 +325,18 @@ const SONGS=[
   C('rockyou2','We Will Rock You','Queen','kVIHwEmE8io',21.5,33.5,'crowd',Y),
   C('cottoneye2','Cotton Eye Joe','Rednex','fYnJZh5ZHIA',22,37,'crowd',L),
   C('dogs2','Who Let the Dogs Out','Baha Men','KYgK97aioNA',30,45,'crowd',L),
+  C('p-trip2','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',6.5,31,'pen',{tag:'Tripping'}),
   C('p-hook2','Hooked on a Feeling','Blue Swede','7Z3uhIRkBNw',26,44,'pen',{tag:'Hooking',...Y}),
   C('p-hold2','Hold the Line','Toto','ZP69PLBqFUo',43.5,58.5,'pen',{tag:'Holding',...Y}),
-  C('p-trip2','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',6.5,31,'pen',{tag:'Tripping'}),
   C('p-slash',"Sweet Child O' Mine","Guns N' Roses",'1w7OgIMMRc4',0,15,'pen',{tag:'Slashing'}),
   C('p-rough2','Bad to the Bone','George Thorogood','nqgUG_JVzCs',33,47,'pen',{tag:'Roughing',...Y}),
   C('p-board2','Crazy Train','Ozzy Osbourne','-WeVabWzEwI',0,7.2,'pen',{tag:'Boarding',desc:'"All aboard!"',...Y}),
-  C('p-eject2','Hit the Road Jack','Ray Charles','uSiHqxgE2d0',4.5,27,'pen',{tag:'Misconduct',...Y}),
   C('p-badboys2','Bad Boys','Inner Circle','2Q3dGZPguSM',7.5,31,'pen',{tag:'Any call',...Y}),
-  C('p-law2','Breaking the Law','Judas Priest','7y7SgmxSX8A',33.5,48,'pen',{tag:'Any call',...Y}),
+  C('o-help2','Help!','The Beatles','MKUex3fci5c',0,11.5,'pen',{tag:'Any call',...Y}),
+  C('o-stay2','Should I Stay or Should I Go','The Clash','BN1WwnEDWAM',0,22,'pen',{tag:'Any call',...Y}),
   C('p-jail2','Jailhouse Rock','Elvis Presley','PpsUOOfb-vE',0,29,'pen',{tag:'Any call',...Y}),
-  C('bitesdust2','Another One Bites the Dust','Queen','0gkFWJu-l08',40.5,58.5,'pen',{tag:'Any call',...Y}),
-  C('o-help2','Help!','The Beatles','MKUex3fci5c',0,11.5,'ours',Y),
-  C('o-stay2','Should I Stay or Should I Go','The Clash','BN1WwnEDWAM',0,22,'ours',Y),
-  C('o-take2',"We're Not Gonna Take It",'Twisted Sister','kJtmYHBG3cg',6.5,19,'ours',Y),
+  C('p-law2','Breaking the Law','Judas Priest','7y7SgmxSX8A',33.5,48,'pen',{tag:'Any call',...Y}),
+  C('p-eject2','Hit the Road Jack','Ray Charles','uSiHqxgE2d0',4.5,27,'pen',{tag:'Misconduct',...Y}),
   B('dontstop',"Don't Stop Believin'",'Journey','1k8craCGpgs'),
   B('prayer',"Livin' on a Prayer",'Bon Jovi','lDK9QqIzhwk'),
   B('shutup','Shut Up and Dance','Walk the Moon','6JCLY0Rlx6Q'),
@@ -359,7 +356,7 @@ const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
 const okT=v=>Number.isFinite(v)&&v>=0;
 const over=load('rbc-cuts',{}), custom=load('rbc-added',[]);
 SONGS.forEach(s=>{const o=over[s.id];if(o&&!s.local&&okT(o.s)&&(okT(o.e)||(o.e===null&&s.kind==='break'))){s.s=o.s;s.e=o.e;s.est=false;}});
-custom.forEach(c=>{c.z=c.z||'mine';c.kind=c.z==='break'?'break':'cue';if(c.e===undefined)c.e=null;});
+custom.forEach(c=>{c.z=c.z==='ours'?'pen':(c.z||'mine');c.kind=c.z==='break'?'break':'cue';if(c.e===undefined)c.e=null;});
 const all=()=>[...SONGS,...custom];
 const persist=s=>{
   if(custom.includes(s)){save('rbc-added',custom);return;}
@@ -624,7 +621,7 @@ $('#bLoad').addEventListener('click',()=>{
   SONGS.forEach(s=>{s.s=s.d0.s;s.e=s.d0.e;s.est=s.kind==='cue';const o=incoming.c[s.id];
     if(o&&okT(o.s)&&(okT(o.e)||(o.e===null&&s.kind==='break'))){over[s.id]={s:o.s,e:o.e};s.s=o.s;s.e=o.e;s.est=false;}});
   custom.length=0;
-  incoming.a.forEach(x=>{ if(!x||!/^[\w-]{11}$/.test(x.vid)||!okT(x.s)) return; const z=ZONES.some(q=>q.id===x.z)?x.z:'mine', brk=z==='break';
+  incoming.a.forEach(x=>{ if(!x||!/^[\w-]{11}$/.test(x.vid)||!okT(x.s)) return; const z=x.z==='ours'?'pen':ZONES.some(q=>q.id===x.z)?x.z:'mine', brk=z==='break';
     if(!brk&&!okT(x.e)) return;
     custom.push({id:String(x.id||('u'+Math.random().toString(36).slice(2,8))),name:String(x.name||'Untitled song').slice(0,40),artist:String(x.artist||'').slice(0,40),vid:x.vid,s:x.s,e:okT(x.e)?x.e:null,z,kind:brk?'break':'cue'}); });
   if(Array.isArray(incoming.f)){ favs=incoming.f.filter(x=>typeof x==='string').slice(0,40); save('rbc-favs',favs); }
