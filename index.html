@@ -155,7 +155,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .stop{font-family:var(--f-display);font-weight:900;font-size:1.35rem;text-transform:uppercase;letter-spacing:.03em;height:48px;padding:0 22px;border-radius:10px;border:0;background:var(--red);color:var(--on-acc);cursor:pointer}
 .stop:disabled{opacity:.35;cursor:default}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:30;
-  max-width:min(560px,calc(100vw - 32px));background:var(--ink);color:var(--ice);padding:10px 14px;border-radius:8px;font-size:.9rem;word-break:break-all;user-select:text}
+  max-width:min(560px,calc(100vw - 32px));background:var(--ink);color:var(--ice);padding:10px 14px;border-radius:8px;font-size:.9rem;overflow-wrap:anywhere;user-select:text}
 footer{padding-block:28px 12px;color:var(--muted);font-size:.85rem;display:grid;gap:6px;max-width:72ch}
 footer p{margin:0}
 
@@ -219,6 +219,7 @@ footer p{margin:0}
   .zone.hero .pad .name{font-size:2rem}
   .zone.hero .pad .artist,.zone.hero .pad .cut{display:none}
   .zone.hero .pad .dur{margin-left:auto}
+  .card.live .pad .name::after{display:none}
 }
 /* offline: pads with your own file show a green pill; pads that need internet dim when offline */
 .card.file .pad .dur{background:var(--green);color:var(--on-acc)}
@@ -231,6 +232,8 @@ footer p{margin:0}
 .offp .warn{color:var(--gold);font-weight:700}
 .offp h3{margin:6px 0 0;font-family:var(--f-data);font-size:1.05rem}
 #installBtn{border-color:var(--green);color:var(--green)}
+#modeBtn.on{background:var(--gold);border-color:var(--gold);color:var(--on-acc)}
+.card.bk .pad .dur{background:var(--green);color:var(--on-acc)}
 @media (prefers-reduced-motion:reduce){.pad{transition:none}}
 </style>
 </head>
@@ -244,6 +247,7 @@ footer p{margin:0}
     </div>
     <div class="controls">
       <button class="btn" id="installBtn" type="button" hidden>Install</button>
+      <button class="btn" id="modeBtn" type="button" aria-pressed="false" title="Offline mode: skip YouTube, play built-in and saved sounds instantly">Offline</button>
       <button class="btn" id="editBtn" type="button" aria-pressed="false">Edit cuts</button>
       <details class="tools" id="tools"><summary class="btn">Tools ▾</summary>
         <div class="menu">
@@ -323,7 +327,7 @@ footer p{margin:0}
   </section>
 
   <footer>
-    <p><b>Before the game:</b> install the board (Tools › Offline &amp; install) so it opens even with no signal, load your own music files so the key pads play offline (green pill = plays offline), and run Tools › Pre-game check on the phone you'll use. Turn on Do Not Disturb so texts don't go over the speakers. On iPhone, flip off silent mode.</p>
+    <p><b>Before the game:</b> install the board (Tools › Offline &amp; install) so it opens even with no signal, load your own music files so the key pads play offline (green pill = plays offline), and run Tools › Pre-game check on the phone you'll use. Offside and Icing fall back to built-in backup sounds when the signal fails; the Offline button at the top makes them (and every green pad) instant and skips YouTube. Turn on Do Not Disturb so texts don't go over the speakers. On iPhone, flip off silent mode.</p>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
     <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. "Open as YouTube playlist" opens that section's songs as one playlist on YouTube, where songs play in full rather than as cuts. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
   </footer>
@@ -359,8 +363,8 @@ const B=(id,name,artist,vid,s=0)=>({id,name,artist,vid,s,e:null,z:'break',kind:'
 const L={src:'list'}, Y={src:'lyrics'}, R={src:'riff'};
 const SONGS=[
   {id:'horn-local',name:'GOAL HORN',artist:'Built-in · plays instantly · works offline',z:'horn',kind:'cue',local:true,s:0,e:6.5,vid:null},
-  C('w-offside2','Stop! In the Name of Love','The Supremes','une981B7Q4Y',1.5,12,'whistle',{tag:'Offside',desc:'"Stop! In the name of love"'}),
-  C('p-icing3','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',57.9,73.5,'whistle',{tag:'Icing',desc:'Full chorus, four hooks',...Y}),
+  C('w-offside2','Stop! In the Name of Love','The Supremes','une981B7Q4Y',1.5,12,'whistle',{tag:'Offside',desc:'"Stop! In the name of love"',backup:'offside'}),
+  C('p-icing3','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',57.9,73.5,'whistle',{tag:'Icing',desc:'Full chorus, four hooks',backup:'icing',...Y}),
   C('song2b','Song 2','Blur','SQrKCytWbj8',8,28.5,'goal',Y),
   C('chelsea','Chelsea Dagger','The Fratellis','sEXHeTcxQy4',24,39,'goal',L),
   C('kernkraft','Kernkraft 400','Zombie Nation','48apI4bpnSo',63,78,'goal',L),
@@ -455,9 +459,10 @@ function card(s,key){
   const pad=c.querySelector('.pad'), foot=c.querySelector('.foot');
   pad.querySelector('.name').textContent=s.tag||s.name;
   pad.querySelector('.artist').textContent=s.local?(customHorn?'Your horn sound · plays instantly · works offline':s.artist):s.tag?`${s.desc?s.desc+' · ':''}${s.name}`:(s.artist||'');
-  const hasFile=!s.local&&!!fileFor(s);
+  const hasFile=!s.local&&!!fileFor(s), useBk=!hasFile&&!!s.backup&&netOff();
   pad.querySelector('.dur').textContent=s.local?(customHorn?`${Math.round(Math.min(customHorn.duration,15))}s`:'Instant'):(hasFile?'✓ ':'')+((s.kind==='break'&&s.e==null)?'Full':`${Math.round(s.e-s.s)}s`);
-  if(hasFile){ c.classList.add('file'); pad.title='Plays your audio file. Works offline.'; } else if(!s.local) c.classList.add('net');
+  if(hasFile){ c.classList.add('file'); pad.title='Plays your audio file. Works offline.'; } else if(!s.local&&!s.backup) c.classList.add('net');
+  if(useBk){ c.classList.add('bk'); pad.querySelector('.dur').textContent=`⚡ ${Math.round(BACKUP[s.backup].len)}s`; pad.querySelector('.artist').textContent=`Built-in ${BACKUP[s.backup].label.replace('built-in ','')} · instant`; }
   const srcLbl={list:'cue list',lyrics:'synced lyrics',riff:'intro riff'}[s.src]||'est.';
   pad.querySelector('.cut').innerHTML=s.local?'Offline':(cutText(s).replace(/ · <b>[^<]*<\/b>$/,'')+(s.est?` <span class="est">· ${srcLbl}</span>`:'')+(bad[s.vid]?` <span class="badtag">· won't play (${bad[s.vid]})</span>`:''));
   if(bad[s.vid]&&!hasFile) c.classList.add('bad');
@@ -467,6 +472,7 @@ function card(s,key){
   mk('Set cut','prime',()=>openEditor(s));
   const fb=mk(favs.includes(s.id)?'★ Favorite':'☆ Favorite','star'+(favs.includes(s.id)?' on':''),()=>{ const i=favs.indexOf(s.id); if(i>=0) favs.splice(i,1); else favs.push(s.id); save('rbc-favs',favs); render(); });
   if(!custom.includes(s)){ if(s.s!==s.d0.s||s.e!==s.d0.e) mk('Reset','',()=>{s.s=s.d0.s;s.e=s.d0.e;persist(s);render();toast(`${s.name} reset`);}); }
+  if(s.backup) mk('Hear backup','',()=>playSynth(s,'Preview'));
   mk(hasFile?'Replace audio file':'Add audio file','',()=>{ padTarget=s; $('#padFile').click(); });
   if(hasFile) mk('Remove file','',()=>{ removeFile(songKey(s)); render(); toast(`${s.name} will stream from YouTube again`); });
   mk('Copy link','',()=>copy(watchUrl(s),`Copied link for ${s.name}`));
@@ -510,6 +516,8 @@ function render(){
 }
 $('#q').addEventListener('input',e=>{ q=e.target.value.trim().toLowerCase(); render(); });
 let autoNext=load('rbc-auto',true)!==false;
+let offMode=load('rbc-offmode',false)===true;
+const netOff=()=>offMode||!navigator.onLine;
 
 /* ---------- player ---------- */
 let player=null, ready=false, cur=null, timer=0, mode='play', fadeT=0;
@@ -525,23 +533,27 @@ window.onYouTubeIframeAPIReady=()=>{
       onStateChange:e=>{
         if(mode==='check'){ if(e.data===YT.PlayerState.PLAYING&&checkMine()) checkDone&&checkDone(null); return; }
         if(mode==='mark'){ $('#cePlay').textContent=e.data===YT.PlayerState.PLAYING?'Pause':'Play'; return; }
+        if(e.data===YT.PlayerState.PLAYING&&(!cur||cur.local||cur.file)){ try{player.pauseVideo();}catch(_){} return; }
         if(!cur) return;
         if(e.data===YT.PlayerState.PLAYING) cur.started=true;
         if(e.data===YT.PlayerState.ENDED&&cur.started) finish(true);
       },
       onError:e=>{ if(mode==='check'){ if(checkMine()) checkDone&&checkDone('error '+e.data); return; }
         const s=cur&&cur.s; if(s&&s.vid){ bad[s.vid]='error '+e.data; save('rbc-bad',bad); } stopNow(); if(mode==='mark') closeEditor(); render();
+        if(s&&s.backup&&mode==='play'){ playSynth(s,'Video won\'t play'); return; }
         $('#tName').textContent=s?`${s.name} won't play here`:'Video error';
         $('#tTime').textContent=`YouTube error ${e.data}. The owner may block embedding.`; }
     }});
 };
-function idleText(){ $('#tName').textContent='Nothing playing'; $('#tTime').textContent=ready?'Tap a song to play it':(ytFailed||!navigator.onLine)?'No internet: horn and green pads play':'Loading the YouTube player…';
+function idleText(){ $('#tName').textContent='Nothing playing'; $('#tTime').textContent=offMode?'Offline mode: horn and green pads play instantly':ready?'Tap a song to play it':(ytFailed||!navigator.onLine)?'No internet: horn and green pads play':'Loading the YouTube player…';
   $('#tProg').style.transform='scaleX(0)'; $('#tStop').disabled=true; $('#tNext').hidden=true; }
 function clearLive(){ document.querySelectorAll('.card.live').forEach(c=>{c.classList.remove('live');c.querySelector('.bar').style.transform='scaleX(0)';}); }
 function play(s){
   if(s.local) return playLocal(s);
   if(mode==='check'){ toast('The pre-game check is running. Use the horn, or wait for the check to finish.'); return; }
   if(fileFor(s)) return playFile(s);
+  if(s.backup&&(netOff()||!ready)) return playSynth(s,offMode?'Offline mode':'No internet');
+  if(offMode){ toast(`Offline mode is on, so ${s.tag||s.name} can't stream. Turn off Offline mode, or load your own file for it.`); return; }
   if(!ready){ toast((ytFailed||!navigator.onLine)?`No internet, so ${s.tag||s.name} can't stream. Load your own file for it (Edit cuts) to play it offline.`:'The YouTube player is still loading. Try again in a second.'); return; }
   if(cur&&cur.local) finish(false);
   if(mode==='mark') closeEditor();
@@ -554,7 +566,9 @@ function play(s){
   $('#tName').textContent=`▶ ${s.tag?s.tag+': ':''}${s.name}`; $('#tTime').textContent='Starting…';
   $('#tStop').disabled=false; $('#tNext').hidden=s.kind!=='break';
   timer=setInterval(tick,100);
-  const me=cur; setTimeout(()=>{ if(cur===me&&!me.started) $('#tTime').textContent='Still loading… weak signal? Green pads play without internet.'; },3500);
+  const me=cur;
+  if(s.backup) setTimeout(()=>{ if(cur===me&&!me.started){ try{player.stopVideo();}catch(e){} playSynth(s,'Weak signal'); } },2500);
+  else setTimeout(()=>{ if(cur===me&&!me.started) $('#tTime').textContent='Still loading… weak signal? Green pads play without internet.'; },3500);
 }
 function tick(){
   if(!cur||!cur.started) return;
@@ -760,6 +774,48 @@ function playLocal(s){
   wake();
 }
 const hornSong=SONGS.find(s=>s.local);
+
+/* built-in backup sounds for Offside and Icing: original stings made in code, no internet needed */
+const NOTE=m=>440*Math.pow(2,(m-69)/12);
+function organ(out,t,notes,dur,vol){
+  const g=actx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.02); g.gain.setValueAtTime(vol,t+Math.max(0.03,dur-0.08)); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  g.connect(out); g.connect(verb);
+  const lfo=actx.createOscillator(); lfo.frequency.value=6.3; const lg=actx.createGain(); lg.gain.value=5; lfo.connect(lg); lfo.start(t); lfo.stop(t+dur+0.05);
+  notes.forEach(m=>[[1,1],[2,.5],[3,.32],[4,.22],[6,.12]].forEach(([h,a])=>{ const o=actx.createOscillator(); o.frequency.value=NOTE(m)*h; lg.connect(o.detune);
+    const og=actx.createGain(); og.gain.value=a/notes.length; o.connect(og).connect(g); o.start(t); o.stop(t+dur+0.05); }));
+}
+function whistle(out,t,dur){
+  const o=actx.createOscillator(); o.frequency.value=2900; const tr=actx.createOscillator(); tr.frequency.value=38; const tg=actx.createGain(); tg.gain.value=180; tr.connect(tg).connect(o.frequency);
+  const g=actx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.14,t+0.02); g.gain.setValueAtTime(0.14,t+dur-0.04); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  const n=actx.createBufferSource(); n.buffer=noiseBuf; n.loop=true; const bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2900; bp.Q.value=4; const ng=actx.createGain(); ng.gain.value=0.3;
+  o.connect(g); n.connect(bp).connect(ng).connect(g); g.connect(out); g.connect(verb); [o,tr,n].forEach(x=>{ x.start(t); x.stop(t+dur+0.05); });
+}
+function bell(out,t,m,dur,vol){ [[1,1],[2.76,.4],[5.4,.15]].forEach(([h,a])=>{ const o=actx.createOscillator(); o.frequency.value=NOTE(m)*h; const g=actx.createGain();
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol*a,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+dur/Math.sqrt(h)); o.connect(g); g.connect(out); g.connect(verb); o.start(t); o.stop(t+dur+0.05); }); }
+const BACKUP={
+  offside:{len:3.2,label:'built-in whistle sting',play:(out,t)=>{ whistle(out,t,0.22); whistle(out,t+0.32,0.55);
+    organ(out,t+1.0,[67,71,74],0.18,0.24); organ(out,t+1.25,[66,70,73],0.18,0.24); organ(out,t+1.5,[62,65,69,74],1.6,0.26); }},
+  icing:{len:3.2,label:'built-in ice chime',play:(out,t)=>{
+    const n=actx.createBufferSource(); n.buffer=noiseBuf; n.loop=true; const f=actx.createBiquadFilter(); f.type='bandpass'; f.Q.value=1.2; f.frequency.setValueAtTime(1500,t); f.frequency.exponentialRampToValueAtTime(9000,t+1.2);
+    const ng=actx.createGain(); ng.gain.setValueAtTime(0.0001,t); ng.gain.linearRampToValueAtTime(0.12,t+0.6); ng.gain.exponentialRampToValueAtTime(0.0001,t+1.6); n.connect(f).connect(ng); ng.connect(out); ng.connect(verb); n.start(t); n.stop(t+1.7);
+    [76,80,83,88,92,95,100].forEach((m,i)=>bell(out,t+0.15+i*0.11,m,1.4,0.16));
+    organ(out,t+1.05,[64,68,71,76],1.95,0.22); [88,95,100].forEach((m,i)=>bell(out,t+1.1+i*0.02,m,2.2,0.1)); }}
+};
+function playSynth(s,why){
+  const b=BACKUP[s.backup]; if(!b) return;
+  if(!AC()){ toast('This browser cannot play the built-in sounds.'); return; }
+  if(cur) finish(false);
+  if(mode==='mark') closeEditor();
+  clearInterval(timer); clearInterval(fadeT); clearLive();
+  const t=actx.currentTime+0.01, out=actx.createGain(); out.gain.value=2.2; out.connect(master); b.play(out,t); // ~ horn loudness
+  const me={s,local:true,out,t0:t,end:t+b.len,started:true,fading:false}; cur=me;
+  (cards.get(s)||[]).forEach(c=>c.classList.add('live'));
+  $('#tName').textContent=`▶ ${s.tag}: ${b.label}`; $('#tStop').disabled=false; $('#tNext').hidden=true;
+  timer=setInterval(()=>{ if(cur!==me) return; const now=actx.currentTime, p=Math.min(1,(now-me.t0)/(me.end-me.t0));
+    $('#tProg').style.transform=`scaleX(${p})`; (cards.get(s)||[]).forEach(c=>c.querySelector('.bar').style.transform=`scaleX(${p})`);
+    $('#tTime').textContent=`${why} · backup plays without internet`; if(now>=me.end) finish(true); },80);
+  wake();
+}
 $('#tHorn').addEventListener('click',()=>{ if(cur&&cur.s===hornSong) stopFade(); else play(hornSong); });
 
 /* your own horn file, kept in this browser (IndexedDB) */
@@ -801,6 +857,7 @@ const vidNow=()=>{ try{ const m=(player.getVideoUrl()||'').match(/[?&]v=([\w-]{1
 const checkMine=()=>{ const v=vidNow(); return !v||v===checkVid; };
 $('#checkBtn').addEventListener('click',async()=>{
   $('#tools').open=false;
+  if(offMode){ toast('Turn off Offline mode to run the pre-game check.'); return; }
   if(!ready){ toast((ytFailed||!navigator.onLine)?'The pre-game check needs internet.':'The YouTube player is still loading. Try again in a second.'); return; }
   if(cur) finish(false); if(mode==='mark') closeEditor(); $('#offP').hidden=true;
   const list=[...new Map(all().filter(s=>s.vid&&!fileFor(s)).map(s=>[s.vid,s])).values()];
@@ -825,6 +882,7 @@ $('#checkP').addEventListener('click',e=>{ if(e.target.closest('.x')) $('#checkP
 /* ---------- your own audio files: pads play them instantly, with no internet ---------- */
 function playFile(s){
   const a=elFor(s); if(!a) return;
+  if(isFinite(a.duration)&&a.duration>0&&s.s>=a.duration-0.5){ toast(`The cut for ${s.name} starts after your file ends. Fix it with Edit cuts › Set cut.`); if(s.backup) playSynth(s,'Cut past end of file'); return; }
   if(cur) finish(false);
   if(mode==='mark') closeEditor();
   clearInterval(timer); clearInterval(fadeT); clearLive();
@@ -903,6 +961,8 @@ function offRender(matched,missed){
   else if(installEvt) h+='<div class="row"><button class="btn on" id="offInstall" type="button">Install app</button><span class="hint">Adds Rink Board to your home screen like a normal app.</span></div>';
   else h+='<span>To install: open the browser menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</span>';
   h+='<h3>2. Songs without internet</h3>';
+  h+='<span>Offside and Icing always make a sound: with no signal, a failed video, or a slow start (over 2.5 s), they play a built-in backup sting instead. Load your own file to get the real song offline.</span>';
+  h+=`<span><b>Offline mode</b> (the Offline button at the top) skips YouTube entirely, so Offside, Icing and every green pad play the instant you tap. Use it if the rink signal is bad. It's ${offMode?'<b>on</b>':'off'} now.</span>`;
   h+=`<span>${withFile} of ${cues.length} game cues play from your own files (green pill). Everything else streams from YouTube and needs signal.</span>`;
   const need=[...new Map(keyMissing.map(s=>[norm(s.name),s])).values()];
   h+= need.length?`<span class="warn">Files still needed for the whistle and penalty pads:</span><ul>${need.map(s=>`<li><b>${esc(s.name)}</b> · ${esc(s.artist)} <span class="hint">(${esc(keyMissing.filter(x=>norm(x.name)===norm(s.name)).map(x=>x.tag||x.name).join(', '))})</span></li>`).join('')}</ul>`:'<span class="ok">✓ Every whistle and penalty pad plays offline.</span>';
@@ -913,9 +973,14 @@ function offRender(matched,missed){
 }
 async function storageLine(){ try{ if(!navigator.storage||!navigator.storage.estimate) return; const [est,per]=await Promise.all([navigator.storage.estimate(),navigator.storage.persisted?navigator.storage.persisted():false]);
   const s=document.createElement('span'); s.className='hint'; s.textContent=`Music saved on this phone: ${Math.round((est.usage||0)/1e6)} MB${per?' · protected from automatic cleanup':''}.`; $('#offP').appendChild(s); }catch(e){} }
-function netUI(){ const off=!navigator.onLine; document.body.classList.toggle('is-offline',off); $('#net').hidden=!off; if(!cur) idleText(); }
-addEventListener('online',()=>{ netUI(); if(!ready){ ytFailed=false; loadYT(); } });
-addEventListener('offline',netUI);
+function netUI(){ const off=netOff(); document.body.classList.toggle('is-offline',off); $('#net').hidden=!off;
+  $('#net').textContent=offMode?'Offline mode · green pads play instantly':'No signal · green pads still play';
+  const b=$('#modeBtn'); b.classList.toggle('on',offMode); b.setAttribute('aria-pressed',offMode); b.textContent=offMode?'Offline: on':'Offline';
+  if(!cur) idleText(); }
+$('#modeBtn').addEventListener('click',()=>{ offMode=!offMode; save('rbc-offmode',offMode); if(offMode&&cur&&!cur.local&&!cur.file) stopNow(); netUI(); render();
+  toast(offMode?'Offline mode on: Offside and Icing play built-in sounds instantly; pads with your files play too. YouTube pads are paused.':'Offline mode off: pads stream from YouTube again.',5000); });
+addEventListener('online',()=>{ netUI(); render(); if(!ready){ ytFailed=false; loadYT(); } });
+addEventListener('offline',()=>{ netUI(); render(); });
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
   const had=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(reg=>{
