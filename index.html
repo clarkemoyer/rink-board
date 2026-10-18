@@ -36,13 +36,19 @@ h1 span{color:var(--red)}
 .sub{font-family:var(--f-data);font-weight:600;font-size:.95rem;color:var(--muted)}
 .controls{display:flex;flex-wrap:wrap;gap:8px}
 .btn{font-family:var(--f-data);font-weight:700;font-size:1rem;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--boards);color:var(--ink);cursor:pointer}
+.btn{text-decoration:none}
 .btn.on{background:var(--ink);color:var(--ice);border-color:var(--ink)}
 :focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 
 .banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;padding:12px 14px;border:1px solid var(--blue);border-radius:10px;background:var(--crease)}
 .banner span{flex:1 1 240px;min-width:0}
 
-.stage{display:grid;grid-template-columns:minmax(0,380px) 1fr;gap:14px;align-items:start;padding-block:14px;border-bottom:1px solid var(--line)}
+.stage{display:grid;gap:14px;padding-block:14px;border-bottom:1px solid var(--line)}
+.playerbox{display:grid;gap:8px;padding-block:28px 0}
+.playerbox h2{font-family:var(--f-display);font-weight:900;font-size:1.2rem;text-transform:uppercase;letter-spacing:.02em;margin:0;color:var(--muted)}
+.playerbox .screen{max-width:420px}
+.ytlink{font-family:var(--f-data);font-weight:700;font-size:.95rem;color:var(--blue);text-decoration:none;white-space:nowrap}
+.ytlink:hover{text-decoration:underline}
 .screen{width:100%;height:214px;border-radius:10px;overflow:hidden;background:#000}
 .screen iframe{width:100%;height:100%;border:0;display:block}
 .side{min-width:0;display:grid;gap:8px;align-content:start}
@@ -144,7 +150,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   max-width:min(560px,calc(100vw - 32px));background:var(--ink);color:var(--ice);padding:10px 14px;border-radius:8px;font-size:.9rem;word-break:break-all;user-select:text}
 footer{padding-block:28px 12px;color:var(--muted);font-size:.85rem;display:grid;gap:6px;max-width:72ch}
 footer p{margin:0}
-@media (max-width:700px){.stage{grid-template-columns:1fr}}
+
 @media (max-width:440px){h1{font-size:1.7rem}.pads{grid-template-columns:repeat(2,minmax(0,1fr))}.pad .name{font-size:1.15rem}.ce-fine{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.pad{transition:none}}
 </style>
@@ -159,6 +165,7 @@ footer p{margin:0}
     <div class="controls">
       <button class="btn" id="editBtn" type="button" aria-pressed="false">Edit cuts</button>
       <button class="btn" id="shareBtn" type="button">Share setup</button>
+      <a class="btn" id="ytAll" target="_blank" rel="noopener">Open on YouTube</a>
     </div>
   </header>
 
@@ -169,9 +176,8 @@ footer p{margin:0}
   </div>
 
   <div class="stage">
-    <div class="screen"><div id="player"></div></div>
     <div class="side">
-      <p class="hint" id="hintPlay"><b>Game mode.</b> The red Goal Horn is always first, and key 1 on a keyboard. Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
+      <p class="hint" id="hintPlay"><b>Game mode.</b> The red Goal Horn is always first, and key 1 on a keyboard. The YouTube player sits at the bottom of the page; it plays from there while you stay up here. Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
       <p class="hint" id="hintEdit" hidden><b>Setting cuts.</b> Tap <b>Set cut</b> on any song. It plays the full video; tap <b>Mark start</b> the moment the hook hits and <b>Mark end</b> where you want it to stop, then <b>Preview</b> and <b>Save</b>.</p>
       <div class="cuted" id="cutEd" hidden>
         <div class="ce-head"><b id="ceName">Song</b><span class="ce-clock" id="ceClock">0:00.0</span></div>
@@ -216,9 +222,14 @@ footer p{margin:0}
     <div><button class="btn on" id="aAdd" type="button">Add and set its cut</button></div>
   </div>
 
+  <section class="playerbox" aria-label="YouTube player">
+    <h2>Player</h2>
+    <div class="screen"><div id="player"></div></div>
+  </section>
+
   <footer>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
-    <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
+    <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. "Open as YouTube playlist" opens that section's songs as one playlist on YouTube, where songs play in full rather than as cuts. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
   </footer>
 </div>
 
@@ -357,6 +368,7 @@ function card(s,key){
 let favs=load('rbc-favs',[]); if(!Array.isArray(favs)) favs=[];
 let closed=load('rbc-closed',[]); if(!Array.isArray(closed)) closed=[];
 let q='';
+const playlistUrl=list=>{ const ids=[...new Set(list.map(s=>s.vid))].slice(0,50); return `https://www.youtube.com/watch_videos?video_ids=${ids.join(',')}`; };
 const matches=s=>!q||`${s.name} ${s.artist} ${s.tag||''}`.toLowerCase().includes(q);
 function render(){
   const root=$('#zones'), chips=$('#chips'); root.innerHTML=''; chips.innerHTML=''; keyed.clear(); cards.clear(); let ki=0; let shown=0;
@@ -372,6 +384,7 @@ function render(){
     hd.addEventListener('click',tog); hd.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); tog(); } });
     if(z.brk){const l=document.createElement('label');l.className='toggle';l.innerHTML=`<input type="checkbox" id="autoNext"> Auto-play the next break song`;
       sec.querySelector('.znote').appendChild(l);const cb=l.querySelector('input');cb.checked=autoNext;cb.addEventListener('change',()=>{autoNext=cb.checked;save('rbc-auto',autoNext);});}
+    if(list.length>1){ const a=document.createElement('a'); a.className='ytlink'; a.target='_blank'; a.rel='noopener'; a.href=playlistUrl(list); a.textContent='▶ Open as YouTube playlist'; sec.querySelector('.znote').appendChild(a); }
     const g=sec.querySelector('.pads');
     list.forEach(s=>{ let k=null; if(!isClosed&&![...keyed.values()].includes(s)){ k=KEYS[ki++]; if(k) keyed.set(k,s); } g.appendChild(card(s,k)); shown++; });
     root.appendChild(sec);
@@ -382,6 +395,7 @@ function render(){
   });
   if(!shown){ const p=document.createElement('p'); p.className='empty-q'; p.textContent=`No songs match "${q}". Clear the search to see everything.`; root.appendChild(p); }
   $('#sub').textContent=`${all().length} songs · tap to play, tap again to stop`;
+  $('#ytAll').href=playlistUrl(all());
   if(cur){ (cards.get(cur.s)||[]).forEach(c=>c.classList.add('live')); }
 }
 $('#q').addEventListener('input',e=>{ q=e.target.value.trim().toLowerCase(); render(); });
