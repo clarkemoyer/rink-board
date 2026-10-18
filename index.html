@@ -177,7 +177,7 @@ footer p{margin:0}
 .checkp b{font-family:var(--f-data);font-size:1.1rem}
 .checkp ul{margin:0;padding-left:18px}
 .quick{margin:0;color:var(--muted);font-family:var(--f-data);font-weight:600;font-size:1rem}
-@media (min-width:900px){.pads{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.pad{min-height:112px}#z-whistle .pads{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:900px){.pads{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.pad{min-height:112px}#z-whistle .pads{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:440px){h1{font-size:1.7rem}.pads{grid-template-columns:repeat(2,minmax(0,1fr))}.pad .name{font-size:1.15rem}.ce-fine{grid-template-columns:1fr}}
 /* compact phone layout: horn, whistles and the top penalties fit on one screen */
 #hintPlay{display:none!important}
@@ -334,9 +334,7 @@ const L={src:'list'}, Y={src:'lyrics'}, R={src:'riff'};
 const SONGS=[
   {id:'horn-local',name:'GOAL HORN',artist:'Built-in · plays instantly · works offline',z:'horn',kind:'cue',local:true,s:0,e:6.5,vid:null},
   C('w-offside2','Stop! In the Name of Love','The Supremes','une981B7Q4Y',1.5,12,'whistle',{tag:'Offside',desc:'"Stop! In the name of love"'}),
-  C('w-iceq','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',18,24.4,'whistle',{tag:'Icing · Quick',desc:'Two "Ice ice baby"s',...Y}),
-  C('p-icing3','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',57.9,73.5,'whistle',{tag:'Icing · Chorus',desc:'Full chorus, four hooks',...Y}),
-  C('p-icing2','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',12.4,40,'whistle',{tag:'Icing · Long',desc:'"Yo VIP" through "Alright stop"',...Y}),
+  C('p-icing3','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',57.9,73.5,'whistle',{tag:'Icing',desc:'Full chorus, four hooks',...Y}),
   C('h-horn','Goal Horn (YouTube)','Horn sound effect','PULbiE5fuTc',0,10,'goal'),
   C('song2b','Song 2','Blur','SQrKCytWbj8',8,28.5,'goal',Y),
   C('chelsea','Chelsea Dagger','The Fratellis','sEXHeTcxQy4',24,39,'goal',L),
