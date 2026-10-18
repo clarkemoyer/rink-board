@@ -177,7 +177,7 @@ footer p{margin:0}
 
   <div class="stage">
     <div class="side">
-      <p class="hint" id="hintPlay"><b>Game mode.</b> The red Goal Horn is always first, and key 1 on a keyboard. The YouTube player sits at the bottom of the page; it plays from there while you stay up here. Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
+      <p class="hint" id="hintPlay"><b>Game mode.</b> The red Goal Horn is always first (key 1 on a keyboard), with Icing and Offside right under it. The YouTube player sits at the bottom of the page; it plays from there while you stay up here. Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
       <p class="hint" id="hintEdit" hidden><b>Setting cuts.</b> Tap <b>Set cut</b> on any song. It plays the full video; tap <b>Mark start</b> the moment the hook hits and <b>Mark end</b> where you want it to stop, then <b>Preview</b> and <b>Save</b>.</p>
       <div class="cuted" id="cutEd" hidden>
         <div class="ce-head"><b id="ceName">Song</b><span class="ce-clock" id="ceClock">0:00.0</span></div>
@@ -246,7 +246,8 @@ footer p{margin:0}
 (()=>{
 const $=s=>document.querySelector(s);
 const ZONES=[
-  {id:'horn',name:'Goal Horn',note:'Pegula Ice Arena horn. Hit it the instant the puck crosses the line.',cat:'var(--red)',hero:true},
+  {id:'horn',name:'Goal Horn',note:'Arena goal horn. Hit it the instant the puck crosses the line.',cat:'var(--red)',hero:true},
+  {id:'whistle',name:'Whistles',note:'The two most common stoppages.',cat:'var(--blue)'},
   {id:'fav',name:'Favorites',note:'Your go-to songs for this game. Star songs in Edit mode to pin them here.',cat:'var(--blue)'},
   {id:'goal',name:'Goal Songs',note:'Right after the horn.',cat:'var(--red)'},
   {id:'hype',name:'Hype',note:'Warm-ups, puck drop, and dead time between whistles.',cat:'var(--blue)'},
@@ -261,7 +262,10 @@ const C=(id,name,artist,vid,s,e,z,o={})=>({id,name,artist,vid,s,e,z,kind:'cue',.
 const B=(id,name,artist,vid,s=0)=>({id,name,artist,vid,s,e:null,z:'break',kind:'break'});
 const L={src:'list'}, Y={src:'lyrics'};
 const SONGS=[
-  C('h-psu','GOAL HORN','Penn State · Pegula Ice Arena','3ARD_hF--JU',0,12,'horn'),
+  C('h-horn','GOAL HORN','Arena goal horn','PULbiE5fuTc',0,10,'horn'),
+  C('w-offside','Stop! In the Name of Love','The Supremes','npG6EEEdGb8',1.5,12,'whistle',{tag:'Offside',...Y}),
+  C('p-icing2','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',12.4,40,'whistle',{tag:'Icing',...Y}),
+  C('p-icing3','Ice Ice Baby (chorus)','Vanilla Ice','8819CVkxKPk',57.9,73.5,'whistle',{tag:'Icing',...Y}),
   C('song2b','Song 2','Blur','SQrKCytWbj8',8,28.5,'goal',Y),
   C('chelsea','Chelsea Dagger','The Fratellis','sEXHeTcxQy4',24,39,'goal',L),
   C('kernkraft','Kernkraft 400','Zombie Nation','48apI4bpnSo',63,78,'goal',L),
@@ -283,8 +287,6 @@ const SONGS=[
   C('rockyou','We Will Rock You','Queen','-tJYN-eG1zk',0,15,'crowd'),
   C('cottoneye2','Cotton Eye Joe','Rednex','fYnJZh5ZHIA',22,37,'crowd',L),
   C('dogs2','Who Let the Dogs Out','Baha Men','KYgK97aioNA',30,45,'crowd',L),
-  C('p-icing2','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',12.4,40,'pen',{tag:'Icing',...Y}),
-  C('p-icing3','Ice Ice Baby (chorus)','Vanilla Ice','8819CVkxKPk',57.9,73.5,'pen',{tag:'Icing',...Y}),
   C('p-hook2','Hooked on a Feeling','Blue Swede','7Z3uhIRkBNw',26,44,'pen',{tag:'Hooking',...Y}),
   C('p-hold2','Hold the Line','Toto','ZP69PLBqFUo',43.5,58.5,'pen',{tag:'Holding',...Y}),
   C('p-trip2','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',6.5,31,'pen',{tag:'Tripping'}),
