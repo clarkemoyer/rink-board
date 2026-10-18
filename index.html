@@ -93,6 +93,28 @@ h1 span{color:var(--red)}
 .card.live .pad .artist,.card.live .pad .cut,.card.live .pad .cut b,.card.live kbd{color:inherit;border-color:currentColor}
 .card.live .pad .name::after{content:"  ■ tap to stop";font-size:.8rem;font-weight:600;opacity:.85;white-space:nowrap}
 @media (hover:none){.pad kbd{display:none}.pad:hover{background:transparent}}
+.zone.hero .pads{grid-template-columns:1fr}
+.zone.hero .pad{min-height:118px;padding:18px 20px;background:var(--red);color:var(--on-acc);flex-direction:row;align-items:center;gap:16px}
+.zone.hero .pad:hover{filter:brightness(1.06);background:var(--red)}
+.zone.hero .pad .name{font-family:var(--f-display);font-weight:900;font-size:2.6rem;letter-spacing:.03em;padding:0}
+.zone.hero .pad .artist,.zone.hero .pad .cut,.zone.hero .pad .cut b,.zone.hero .pad kbd{color:inherit;border-color:currentColor;opacity:.9}
+.zone.hero .pad .cut{margin:0 0 0 auto;padding:0;text-align:right}
+.zone.hero .card{border-color:var(--red)}
+.zone.hero .zone-h,.zone.hero .znote{display:none}
+.card.live .pad .name::after{content:"  ■ tap to stop"}
+.zone-h{cursor:pointer;user-select:none}
+.zone-h .chev{font-family:var(--f-data);font-weight:700;color:var(--muted);font-size:.95rem;white-space:nowrap}
+.zone.closed .pads,.zone.closed .znote{display:none}
+.zone-h .count{font-family:var(--f-data);font-weight:600;font-size:.9rem;color:var(--muted)}
+.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:var(--ice);display:flex;gap:8px;align-items:center;padding-block:10px;border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+.jump input{flex:0 1 220px;min-width:120px;font:inherit;font-size:1rem;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:var(--boards);color:var(--ink)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-family:var(--f-data);font-weight:700;font-size:.95rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--boards);color:var(--ink);cursor:pointer;white-space:nowrap}
+.chip::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cat);margin-right:6px;vertical-align:1px}
+.empty-q{color:var(--muted);padding:20px 0;margin:0}
+.mini.star.on{background:var(--gold);border-color:var(--gold);color:var(--on-acc)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ice)}
 .foot{display:none;flex-wrap:wrap;align-items:center;gap:6px;padding:8px;border-top:1px solid var(--line)}
 .editing .foot{display:flex}
 .mini{font-family:var(--f-data);font-weight:700;font-size:.9rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--ice);color:var(--ink);cursor:pointer;line-height:1.3}
@@ -149,7 +171,7 @@ footer p{margin:0}
   <div class="stage">
     <div class="screen"><div id="player"></div></div>
     <div class="side">
-      <p class="hint" id="hintPlay"><b>Game mode.</b> Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
+      <p class="hint" id="hintPlay"><b>Game mode.</b> The red Goal Horn is always first, and key 1 on a keyboard. Tap a song and it plays its cut, then stops on its own. Tap the lit pad or the red Stop button to fade it out early; tap Stop twice to cut it instantly.</p>
       <p class="hint" id="hintEdit" hidden><b>Setting cuts.</b> Tap <b>Set cut</b> on any song. It plays the full video; tap <b>Mark start</b> the moment the hook hits and <b>Mark end</b> where you want it to stop, then <b>Preview</b> and <b>Save</b>.</p>
       <div class="cuted" id="cutEd" hidden>
         <div class="ce-head"><b id="ceName">Song</b><span class="ce-clock" id="ceClock">0:00.0</span></div>
@@ -175,6 +197,11 @@ footer p{margin:0}
     </div>
   </div>
 
+  <nav class="jump" aria-label="Sections">
+    <input id="q" type="search" placeholder="Find a song…" autocomplete="off" aria-label="Find a song">
+    <div class="chips" id="chips"></div>
+  </nav>
+
   <main id="zones"></main>
 
   <div class="addbox" id="addbox">
@@ -191,7 +218,7 @@ footer p{margin:0}
 
   <footer>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
-    <p>Cuts marked "cue list" start where published arena cue lists put the hook; "est." cuts are starting guesses to check by ear with Set cut. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, and the right arrow skips to the next break song.</p>
+    <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
   </footer>
 </div>
 
@@ -208,8 +235,9 @@ footer p{margin:0}
 (()=>{
 const $=s=>document.querySelector(s);
 const ZONES=[
-  {id:'horn',name:'Goal Horns',note:'Arena horn recordings: the horn hits right away, then the team song kicks in.',cat:'var(--red)'},
-  {id:'goal',name:'Goal Songs',note:'Red light is on. Hit it the second the horn stops.',cat:'var(--red)'},
+  {id:'horn',name:'Goal Horn',note:'Pegula Ice Arena horn. Hit it the instant the puck crosses the line.',cat:'var(--red)',hero:true},
+  {id:'fav',name:'Favorites',note:'Your go-to songs for this game. Star songs in Edit mode to pin them here.',cat:'var(--blue)'},
+  {id:'goal',name:'Goal Songs',note:'Right after the horn.',cat:'var(--red)'},
   {id:'hype',name:'Hype',note:'Warm-ups, puck drop, and dead time between whistles.',cat:'var(--blue)'},
   {id:'crowd',name:'Crowd',note:'Songs the stands chant or clap along to.',cat:'var(--ink)'},
   {id:'pen',name:'Their Penalty',note:'Opponent heads to the box. Pick the song that matches the call.',cat:'var(--gold)'},
@@ -217,22 +245,19 @@ const ZONES=[
   {id:'break',name:'Period Breaks',note:'Full songs for intermission and the ice cut.',cat:'var(--green)',brk:true},
   {id:'mine',name:'Added songs',note:'Game cues you added.',cat:'var(--muted)'},
 ];
-/* src: 'list' = start time from a published cue list (track timing); otherwise an estimate to check by ear */
+/* src: 'lyrics' = cut placed from synced-lyric line times on the album audio; 'list' = start time from a published arena cue list; otherwise an estimate to check by ear */
 const C=(id,name,artist,vid,s,e,z,o={})=>({id,name,artist,vid,s,e,z,kind:'cue',...o});
 const B=(id,name,artist,vid,s=0)=>({id,name,artist,vid,s,e:null,z:'break',kind:'break'});
-const L={src:'list'};
+const L={src:'list'}, Y={src:'lyrics'};
 const SONGS=[
-  C('h-chi','Chicago Blackhawks','Horn + Chelsea Dagger','b8OLWEqEaJk',0,20,'horn'),
-  C('h-bos','Boston Bruins','Horn + Kernkraft 400','Y-PFYzmo_GU',0,20,'horn'),
-  C('h-pit','Pittsburgh Penguins','Horn + goal song','OmKnz-w1qyk',0,20,'horn'),
-  C('h-cbj','Columbus Blue Jackets','Horn + cannon','YTFo87lkf3E',0,20,'horn'),
-  C('h-det','Detroit Red Wings','Horn + goal song','EkKBEarP6Ow',0,20,'horn'),
-  C('h-min','Minnesota Wild','Horn + siren','Gw0LfN4PrDc',0,20,'horn'),
-  C('song2a','Song 2','Blur','SQrKCytWbj8',8,20,'goal',L),
+  C('h-psu','GOAL HORN','Penn State · Pegula Ice Arena','3ARD_hF--JU',0,12,'horn'),
+  C('song2b','Song 2','Blur','SQrKCytWbj8',8,28.5,'goal',Y),
   C('chelsea','Chelsea Dagger','The Fratellis','sEXHeTcxQy4',24,39,'goal',L),
   C('kernkraft','Kernkraft 400','Zombie Nation','48apI4bpnSo',63,78,'goal',L),
   C('crowdchant','Crowd Chant','Joe Satriani','eoWtsVXPExs',8,23,'goal',L),
   C('shipping','I\'m Shipping Up to Boston','Dropkick Murphys','pMgHX2dhVlE',29,44,'goal',L),
+  C('whoomp','Whoomp! (There It Is)','Tag Team','L6mNa_QZVHg',32,47,'goal',L),
+  C('babyshark','Baby Shark','Pinkfong','XqZsoesa55w',19,34,'goal',L),
   C('jump','Jump Around','House of Pain','XhzpxjuwZy0',0,15,'goal'),
   C('brightside','Mr. Brightside','The Killers','gGdGFtwCNBE',0,15,'goal'),
   C('thunderstruck','Thunderstruck','AC/DC','v2AC41dglnM',15,30,'hype'),
@@ -247,23 +272,22 @@ const SONGS=[
   C('rockyou','We Will Rock You','Queen','-tJYN-eG1zk',0,15,'crowd'),
   C('cottoneye2','Cotton Eye Joe','Rednex','fYnJZh5ZHIA',22,37,'crowd',L),
   C('dogs2','Who Let the Dogs Out','Baha Men','KYgK97aioNA',30,45,'crowd',L),
-  C('p-icing','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',8,35,'pen',{tag:'Icing'}),
-  C('p-hook','Hooked on a Feeling','Blue Swede','vWO22LXBgZY',0,20,'pen',{tag:'Hooking'}),
-  C('p-hold','Hold the Line','Toto','htgr3pvBr-I',45,65,'pen',{tag:'Holding'}),
-  C('p-trip','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',0,20,'pen',{tag:'Tripping'}),
+  C('p-icing2','Ice Ice Baby','Vanilla Ice','8819CVkxKPk',12.4,40,'pen',{tag:'Icing',...Y}),
+  C('p-icing3','Ice Ice Baby (chorus)','Vanilla Ice','8819CVkxKPk',57.9,73.5,'pen',{tag:'Icing',...Y}),
+  C('p-hook2','Hooked on a Feeling','Blue Swede','7Z3uhIRkBNw',26,44,'pen',{tag:'Hooking',...Y}),
+  C('p-hold2','Hold the Line','Toto','ZP69PLBqFUo',43.5,58.5,'pen',{tag:'Holding',...Y}),
+  C('p-trip2','Timber','Pitbull ft. Kesha','hHUbLv4ThOo',6.5,31,'pen',{tag:'Tripping'}),
   C('p-slash',"Sweet Child O' Mine","Guns N' Roses",'1w7OgIMMRc4',0,15,'pen',{tag:'Slashing'}),
-  C('p-rough','Bad to the Bone','George Thorogood','IyhJ69mD7xI',0,20,'pen',{tag:'Roughing'}),
-  C('p-fight','Kung Fu Fighting','Carl Douglas','hq5REevpSP8',10,30,'pen',{tag:'Fighting'}),
+  C('p-rough2','Bad to the Bone','George Thorogood','nqgUG_JVzCs',33,47,'pen',{tag:'Roughing',...Y}),
   C('p-board','Crazy Train','Ozzy Osbourne','tMDFv5m18Pw',0,12,'pen',{tag:'Boarding'}),
-  C('p-unsport','Bad Reputation','Joan Jett','nO6YL09T8Fw',0,15,'pen',{tag:'Unsportsmanlike'}),
-  C('p-eject','Hit the Road Jack','Ray Charles','uSiHqxgE2d0',0,15,'pen',{tag:'Misconduct / ejected'}),
-  C('p-badboys','Bad Boys','Inner Circle','VJIPF87kgpQ',0,20,'pen',{tag:'Any call'}),
-  C('p-law','Breaking the Law','Judas Priest','7y7SgmxSX8A',38,55,'pen',{tag:'Any call'}),
-  C('p-jail','Jailhouse Rock','Elvis Presley','PpsUOOfb-vE',0,15,'pen',{tag:'Any call'}),
-  C('bitesdust','Another One Bites the Dust','Queen','rY0WxgSXdEE',45,60,'pen',{tag:'Any call'}),
-  C('o-help','Help!','The Beatles','MKUex3fci5c',0,12,'ours'),
-  C('o-stay','Should I Stay or Should I Go','The Clash','BN1WwnEDWAM',0,15,'ours'),
-  C('o-take',"We're Not Gonna Take It",'Twisted Sister','kJtmYHBG3cg',0,15,'ours'),
+  C('p-eject2','Hit the Road Jack','Ray Charles','uSiHqxgE2d0',4.5,27,'pen',{tag:'Misconduct',...Y}),
+  C('p-badboys2','Bad Boys','Inner Circle','2Q3dGZPguSM',7.5,31,'pen',{tag:'Any call',...Y}),
+  C('p-law2','Breaking the Law','Judas Priest','7y7SgmxSX8A',33.5,48,'pen',{tag:'Any call',...Y}),
+  C('p-jail2','Jailhouse Rock','Elvis Presley','PpsUOOfb-vE',0,29,'pen',{tag:'Any call',...Y}),
+  C('bitesdust2','Another One Bites the Dust','Queen','0gkFWJu-l08',40.5,58.5,'pen',{tag:'Any call',...Y}),
+  C('o-help2','Help!','The Beatles','MKUex3fci5c',0,11.5,'ours',Y),
+  C('o-stay2','Should I Stay or Should I Go','The Clash','BN1WwnEDWAM',0,22,'ours',Y),
+  C('o-take2',"We're Not Gonna Take It",'Twisted Sister','kJtmYHBG3cg',6.5,19,'ours',Y),
   B('dontstop',"Don't Stop Believin'",'Journey','1k8craCGpgs'),
   B('prayer',"Livin' on a Prayer",'Bon Jovi','lDK9QqIzhwk'),
   B('shutup','Shut Up and Dance','Walk the Moon','6JCLY0Rlx6Q'),
@@ -319,32 +343,48 @@ function card(s,key){
   c.innerHTML=`<button class="pad" type="button"><span class="name"></span><span class="artist"></span><span class="cut"></span>${key?`<kbd>${key}</kbd>`:''}<span class="bar"></span></button><div class="foot"></div>`;
   const pad=c.querySelector('.pad'), foot=c.querySelector('.foot');
   pad.querySelector('.name').textContent=s.tag||s.name; pad.querySelector('.artist').textContent=s.tag?`${s.name} · ${s.artist}`:(s.artist||'');
-  pad.querySelector('.cut').innerHTML=cutText(s)+(s.est?` <span class="est">· ${s.src==='list'?'cue list':'est.'}</span>`:'');
+  pad.querySelector('.cut').innerHTML=cutText(s)+(s.est?` <span class="est">· ${s.src==='list'?'cue list':s.src==='lyrics'?'synced lyrics':'est.'}</span>`:'');
   pad.addEventListener('click',()=>{ if(cur&&cur.s===s) stopFade(); else play(s); });
   const mk=(txt,cls,fn)=>{const b=document.createElement('button');b.type='button';b.className='mini '+cls;b.textContent=txt;b.addEventListener('click',fn);foot.appendChild(b);return b;};
   mk('Set cut','prime',()=>openEditor(s));
+  const fb=mk(favs.includes(s.id)?'★ Favorite':'☆ Favorite','star'+(favs.includes(s.id)?' on':''),()=>{ const i=favs.indexOf(s.id); if(i>=0) favs.splice(i,1); else favs.push(s.id); save('rbc-favs',favs); render(); });
   if(!custom.includes(s)){ if(s.s!==s.d0.s||s.e!==s.d0.e) mk('Reset','',()=>{s.s=s.d0.s;s.e=s.d0.e;persist(s);render();toast(`${s.name} reset`);}); }
   mk('Copy link','',()=>copy(watchUrl(s),`Copied link for ${s.name}`));
   if(custom.includes(s)){ let armed=false; const d=mk('Remove','danger',()=>{ if(!armed){armed=true;d.textContent='Tap again to remove';setTimeout(()=>{armed=false;d.textContent='Remove';},3000);return;}
     if(cur&&cur.s===s) stopNow(); custom.splice(custom.indexOf(s),1);save('rbc-added',custom);render(); }); }
-  cards.set(s,c); return c;
+  if(!cards.has(s)) cards.set(s,[]); cards.get(s).push(c); return c;
 }
+let favs=load('rbc-favs',[]); if(!Array.isArray(favs)) favs=[];
+let closed=load('rbc-closed',[]); if(!Array.isArray(closed)) closed=[];
+let q='';
+const matches=s=>!q||`${s.name} ${s.artist} ${s.tag||''}`.toLowerCase().includes(q);
 function render(){
-  const root=$('#zones');root.innerHTML='';keyed.clear();cards.clear();let ki=0;
+  const root=$('#zones'), chips=$('#chips'); root.innerHTML=''; chips.innerHTML=''; keyed.clear(); cards.clear(); let ki=0; let shown=0;
   ZONES.forEach(z=>{
-    const list=all().filter(s=>s.z===z.id); if(!list.length) return;
-    const sec=document.createElement('section');sec.className='zone';sec.style.setProperty('--cat',z.cat);
-    sec.innerHTML=`<div class="zone-h"><h2></h2><span class="rule"></span></div><div class="znote"><span></span></div><div class="pads"></div>`;
-    sec.querySelector('h2').textContent=z.name;sec.querySelector('.znote span').textContent=z.note;
+    let list=z.id==='fav'?favs.map(id=>all().find(s=>s.id===id)).filter(Boolean):all().filter(s=>s.z===z.id);
+    list=list.filter(matches); if(!list.length) return;
+    const isClosed=!q&&closed.includes(z.id);
+    const sec=document.createElement('section'); sec.className='zone'+(z.hero?' hero':'')+(isClosed?' closed':''); sec.id='z-'+z.id; sec.style.setProperty('--cat',z.cat);
+    sec.innerHTML=`<div class="zone-h" role="button" tabindex="0"><h2></h2><span class="count"></span><span class="rule"></span><span class="chev"></span></div><div class="znote"><span></span></div><div class="pads"></div>`;
+    sec.querySelector('h2').textContent=z.name; sec.querySelector('.count').textContent=list.length; sec.querySelector('.znote span').textContent=z.note;
+    sec.querySelector('.chev').textContent=isClosed?'Show ▾':'Hide ▴';
+    const hd=sec.querySelector('.zone-h'); const tog=()=>{ const i=closed.indexOf(z.id); if(i>=0) closed.splice(i,1); else closed.push(z.id); save('rbc-closed',closed); render(); };
+    hd.addEventListener('click',tog); hd.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); tog(); } });
     if(z.brk){const l=document.createElement('label');l.className='toggle';l.innerHTML=`<input type="checkbox" id="autoNext"> Auto-play the next break song`;
       sec.querySelector('.znote').appendChild(l);const cb=l.querySelector('input');cb.checked=autoNext;cb.addEventListener('change',()=>{autoNext=cb.checked;save('rbc-auto',autoNext);});}
     const g=sec.querySelector('.pads');
-    list.forEach(s=>{const k=KEYS[ki++];g.appendChild(card(s,k));if(k)keyed.set(k,s);});
+    list.forEach(s=>{ let k=null; if(!isClosed&&![...keyed.values()].includes(s)){ k=KEYS[ki++]; if(k) keyed.set(k,s); } g.appendChild(card(s,k)); shown++; });
     root.appendChild(sec);
+    if(!z.hero){ const ch=document.createElement('button'); ch.type='button'; ch.className='chip'; ch.style.setProperty('--cat',z.cat); ch.textContent=z.name;
+      ch.addEventListener('click',()=>{ if(closed.includes(z.id)){ closed.splice(closed.indexOf(z.id),1); save('rbc-closed',closed); render(); }
+        const el=document.getElementById('z-'+z.id); if(el){ const y=el.getBoundingClientRect().top+scrollY-($('.jump').offsetHeight+8); scrollTo({top:y,behavior:'smooth'}); } });
+      chips.appendChild(ch); }
   });
+  if(!shown){ const p=document.createElement('p'); p.className='empty-q'; p.textContent=`No songs match "${q}". Clear the search to see everything.`; root.appendChild(p); }
   $('#sub').textContent=`${all().length} songs · tap to play, tap again to stop`;
-  if(cur){const c=cards.get(cur.s);if(c)c.classList.add('live');}
+  if(cur){ (cards.get(cur.s)||[]).forEach(c=>c.classList.add('live')); }
 }
+$('#q').addEventListener('input',e=>{ q=e.target.value.trim().toLowerCase(); render(); });
 let autoNext=load('rbc-auto',true)!==false;
 
 /* ---------- player ---------- */
@@ -374,7 +414,7 @@ function play(s){
   if(mode==='mark') closeEditor();
   clearInterval(timer); clearInterval(fadeT); clearLive();
   cur={s,started:false,fading:false};
-  const c=cards.get(s); if(c) c.classList.add('live');
+  (cards.get(s)||[]).forEach(c=>c.classList.add('live'));
   player.setVolume(100); player.unMute();
   const o={videoId:s.vid,startSeconds:s.s}; if(s.e!=null) o.endSeconds=s.e;
   player.loadVideoById(o);
@@ -388,7 +428,7 @@ function tick(){
   if(t<s.s-1) return; // still seeking from a previous video
   const end=s.e!=null?s.e:(dur||0); const len=Math.max(.1,end-s.s), p=Math.min(1,Math.max(0,(t-s.s)/len));
   $('#tProg').style.transform=`scaleX(${p})`;
-  const c=cards.get(s); if(c) c.querySelector('.bar').style.transform=`scaleX(${p})`;
+  (cards.get(s)||[]).forEach(c=>c.querySelector('.bar').style.transform=`scaleX(${p})`);
   $('#tTime').textContent= s.kind==='break'
     ? `${fmt(Math.floor(t))} / ${fmt(Math.floor(end))} · ${fmt(Math.max(0,Math.ceil(end-t)))} left${autoNext?' · next song auto-plays':''}`
     : `${fmt(Math.max(0,end-t),true)} left of ${r1(len)} s`;
@@ -501,7 +541,7 @@ $('#editBtn').addEventListener('click',()=>{
 const enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const dec=t=>JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,'+').replace(/_/g,'/')))));
 $('#shareBtn').addEventListener('click',()=>{
-  const link=`${location.origin}${location.pathname}#setup=${enc({v:2,c:over,a:custom.map(({id,name,artist,vid,s,e,z})=>({id,name,artist,vid,s,e,z}))})}`;
+  const link=`${location.origin}${location.pathname}#setup=${enc({v:3,c:over,f:favs,a:custom.map(({id,name,artist,vid,s,e,z})=>({id,name,artist,vid,s,e,z}))})}`;
   copy(link,'Setup link copied. Open it on the other device and tap Load.');
 });
 let incoming=null;
@@ -520,6 +560,7 @@ $('#bLoad').addEventListener('click',()=>{
   incoming.a.forEach(x=>{ if(!x||!/^[\w-]{11}$/.test(x.vid)||!okT(x.s)) return; const z=ZONES.some(q=>q.id===x.z)?x.z:'mine', brk=z==='break';
     if(!brk&&!okT(x.e)) return;
     custom.push({id:String(x.id||('u'+Math.random().toString(36).slice(2,8))),name:String(x.name||'Untitled song').slice(0,40),artist:String(x.artist||'').slice(0,40),vid:x.vid,s:x.s,e:okT(x.e)?x.e:null,z,kind:brk?'break':'cue'}); });
+  if(Array.isArray(incoming.f)){ favs=incoming.f.filter(x=>typeof x==='string').slice(0,40); save('rbc-favs',favs); }
   save('rbc-cuts',over); save('rbc-added',custom); clearHash(); render(); toast('Setup loaded');
 });
 
@@ -528,6 +569,7 @@ addEventListener('keydown',e=>{
   if(e.metaKey||e.ctrlKey||e.altKey||e.repeat) return;
   if(e.target.closest&&e.target.closest('input,select,textarea')) return;
   if(e.code==='Space'||e.key==='Escape'){ e.preventDefault(); if(mode==='mark'){ $('#cePlay').click(); } else stopFade(); return; }
+  if(e.key==='/'){ e.preventDefault(); $('#q').focus(); return; }
   if(e.key==='ArrowRight'&&cur&&cur.s.kind==='break'){ e.preventDefault(); playNextBreak(cur.s); return; }
   if(mode==='mark') return;
   const s=keyed.get(e.key.toLowerCase()); if(s){ e.preventDefault(); if(cur&&cur.s===s) stopFade(); else play(s); }
