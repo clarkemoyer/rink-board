@@ -92,6 +92,7 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
 
   <nav class="toc" aria-label="On this page">
     <a href="#prep">Before the game</a>
+    <a href="#quiet">Silence texts</a>
     <a href="#ads">Ads &amp; browsers</a>
     <a href="#during">During the game</a>
     <a href="#pads">Reading the pads</a>
@@ -117,12 +118,35 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
     <ul class="check">
       <li><b>Plug into the sound system.</b> Use an aux cable if you can. Bluetooth works, but adds a short delay between tap and sound.</li>
       <li><b>Plug in the charger.</b> The board keeps the screen awake while it's open, which uses battery.</li>
-      <li><b>Turn on Do Not Disturb</b> so texts and calls don't play over the speakers.</li>
+      <li><b>Silence calls and texts, but not the music.</b> Do Not Disturb on Android can mute the board too, unless you allow media sounds. Follow <a href="#quiet">these steps</a> once, then tap the HORN to confirm you still hear it.</li>
       <li><b>Set volume:</b> phone volume all the way up, then set loudness on the arena mixer.</li>
       <li><b>Tap the HORN</b> (bottom bar) once. That unlocks audio on the device and checks the speaker level.</li>
       <li><b>Play one YouTube pad</b> for a few seconds. It confirms the rink signal works and that no ad plays.</li>
       <li><b>Weak signal?</b> Tap <b>Offline</b> at the top. YouTube is skipped, and the horn, Offside, Icing and any green pads play instantly.</li>
     </ul>
+  </section>
+
+  <section id="quiet" style="--cat:var(--gold)">
+    <h2>Silence texts, keep the music</h2>
+    <p>A text chime or ringtone over the arena speakers is the classic sound-booth mistake. Android's <b>Do Not Disturb mutes media too unless you allow it</b>, which would leave the rink silent. Set it up once like this.</p>
+    <h3>Android (Pixel, Android 14 and newer)</h3>
+    <ol>
+      <li>Open <b>Settings</b> &rsaquo; <b>Modes</b> &rsaquo; <b>Do Not Disturb</b>.</li>
+      <li>Tap <b>Alarms &amp; other interruptions</b> and turn <b>Media sounds</b> <b>on</b>. This is the step that keeps the board audible.</li>
+      <li>Tap <b>People</b> and set calls and messages to <b>None</b>. Turn off <b>Allow repeat callers</b>.</li>
+      <li>Tap <b>Apps</b> and make sure no apps are allowed to interrupt.</li>
+      <li>Turn Do Not Disturb on, open the board and tap <b>HORN</b>. If you hear it, you're set.</li>
+    </ol>
+    <p>Older Android or Samsung: the same options are under <b>Settings</b> &rsaquo; <b>Sound &amp; vibration</b> (or <b>Notifications</b>) &rsaquo; <b>Do Not Disturb</b>. Look for <b>Media</b> or <b>Media sounds</b> and allow it. Menu names vary by phone.</p>
+    <h3>Any phone: skip Do Not Disturb and turn the ringer down</h3>
+    <ol>
+      <li>Press a volume button, then tap the <b>&#8942;</b> or settings icon on the volume slider.</li>
+      <li>Slide <b>Ring</b> and <b>Notification</b> all the way down (or set the ringer to vibrate).</li>
+      <li>Leave <b>Media</b> all the way up. That's the slider the board uses.</li>
+    </ol>
+    <p>That way calls and texts make no sound, but the board still plays. Remember to turn the ringer back up after the game.</p>
+    <h3>iPhone</h3>
+    <p>Focus / Do Not Disturb on iPhone silences calls and notifications but not the board. Also flip the side switch (or Action button) off silent, or the board can be muted.</p>
   </section>
 
   <section id="ads" style="--cat:var(--red)">
@@ -207,33 +231,21 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
 
   <section id="request" style="--cat:var(--red)">
     <h2>Request a song</h2>
-    <p>Want a song added for everyone? Text it to <a class="num" href="sms:+15202228104">520-222-8104</a>. Fill this in and tap <b>Text this request</b>, and your phone opens a text with everything filled in.</p>
+    <p>Want a song added for everyone? Find it on YouTube, copy the link (Share &rsaquo; Copy link), paste it below and pick a section. Tapping <b>Text this request</b> opens a text to <a class="num" href="sms:+15202228104">520-222-8104</a> with both filled in.</p>
     <div class="card">
       <form id="req" novalidate>
-        <div class="row2">
-          <label>Song title<input id="rSong" required maxlength="80" autocomplete="off" placeholder="e.g. Eye of the Tiger"></label>
-          <label>Artist<input id="rArtist" maxlength="80" autocomplete="off" placeholder="e.g. Survivor"></label>
-        </div>
+        <label>YouTube link<input id="rLink" type="url" inputmode="url" autocomplete="off" required placeholder="https://youtu.be/&hellip;"></label>
         <label>Which section?
-          <select id="rZone">
+          <select id="rZone" required>
             <option value="">Choose a section&hellip;</option>
-            <option>Goal Songs: right after the horn</option>
-            <option>Hype: warm-ups, puck drop, dead time</option>
-            <option>Crowd: songs the stands chant or clap to</option>
-            <option>Penalties: plays for either team</option>
-            <option>Whistles: offside or icing</option>
-            <option>Period Breaks: full song at intermission</option>
-            <option>Not sure: you pick</option>
+            <option value="Goal Songs">Goal Songs: right after the horn</option>
+            <option value="Hype">Hype: warm-ups, puck drop, dead time</option>
+            <option value="Crowd">Crowd: songs the stands chant or clap to</option>
+            <option value="Penalties">Penalties: plays for either team</option>
+            <option value="Whistles">Whistles: offside or icing</option>
+            <option value="Period Breaks">Period Breaks: full song at intermission</option>
           </select>
         </label>
-        <label id="rPenL" hidden>Which call?
-          <select id="rPen">
-            <option>Any call</option><option>Tripping</option><option>Hooking</option><option>Holding</option><option>Slashing</option><option>Roughing</option><option>Boarding</option><option>Interference</option><option>High-sticking</option><option>Too many players</option><option>Misconduct</option>
-          </select>
-        </label>
-        <label>YouTube link <small>Optional, but it helps: paste the version you mean.</small><input id="rLink" type="url" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=&hellip;"></label>
-        <label id="rPartL">Which part to play <small>For short cues: "the chorus" or a time like 1:05.</small><input id="rPart" maxlength="80" autocomplete="off" placeholder="e.g. the chorus at 1:05"></label>
-        <label>Your name <small>Optional</small><input id="rName" maxlength="60" autocomplete="name"></label>
         <p class="err" id="rErr" hidden></p>
         <div class="actions">
           <button class="btn go" type="submit">Text this request</button>
@@ -246,8 +258,8 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
     <ul>
       <li><b>Clean songs only.</b> This is a 10U game: no swearing and no drug or drinking references. Clean radio edits are fine.</li>
       <li><b>Penalty songs stay neutral.</b> Nothing aimed at one team, a player, or the refs.</li>
-      <li>The song has to play from YouTube inside the board. Some official videos block that, and then we look for another version.</li>
-      <li>Game cues run 3 to 30 seconds. Period-break songs play in full.</li>
+      <li>The song has to play from YouTube inside the board. Some official videos block that; if yours does, we'll look for another version.</li>
+      <li>Game cues run 3 to 30 seconds, and we pick the best part. Period-break songs play in full.</li>
     </ul>
     <p>Need it today? You can add a song to your own device right now: on the board, tap <b>Edit cuts</b>, then use <b>Add a song</b> at the bottom. It only shows on that device until it's added for everyone.</p>
   </section>
@@ -257,24 +269,20 @@ footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:v
 <script>
 (()=>{
   const $=s=>document.querySelector(s), NUM='+15202228104';
-  const zone=$('#rZone'), penL=$('#rPenL'), partL=$('#rPartL');
-  function body(){
-    const z=zone.value, pen=z.startsWith('Penalties');
-    const lines=['Rink Board song request',
-      `Song: ${$('#rSong').value.trim()||'?'}${$('#rArtist').value.trim()?' by '+$('#rArtist').value.trim():''}`,
-      `Section: ${z?z.split(':')[0]:'?'}${pen?' ('+$('#rPen').value+')':''}`];
-    if(!z.startsWith('Period')&&$('#rPart').value.trim()) lines.push(`Part: ${$('#rPart').value.trim()}`);
-    if($('#rLink').value.trim()) lines.push(`Link: ${$('#rLink').value.trim()}`);
-    if($('#rName').value.trim()) lines.push(`From: ${$('#rName').value.trim()}`);
-    return lines.join('\n');
-  }
-  function sync(){ penL.hidden=!zone.value.startsWith('Penalties'); partL.hidden=zone.value.startsWith('Period'); $('#rPrev').textContent=body(); }
-  $('#req').addEventListener('input',sync); zone.addEventListener('change',sync); sync();
+  function vid(u){ try{ const x=new URL(String(u).trim()); const host=x.hostname.replace(/^(www|m|music)\./,'');
+      if(host==='youtu.be') return {id:x.pathname.slice(1,12),t:x.searchParams.get('t')};
+      if(host==='youtube.com'){ const v=x.searchParams.get('v'); if(v) return {id:v,t:x.searchParams.get('t')};
+        const m=x.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/); if(m) return {id:m[2],t:x.searchParams.get('t')}; } }catch(e){}
+    return null; }
+  const ok=r=>r&&/^[\w-]{11}$/.test(r.id);
+  function body(){ const r=vid($('#rLink').value), z=$('#rZone').value, t=r?parseInt(r.t,10):0;
+    return ['Rink Board song request',`Section: ${z||'?'}`,`Link: ${ok(r)?'https://youtu.be/'+r.id+(t>0?'?t='+t:''):($('#rLink').value.trim()||'?')}`].join('\n'); }
+  const sync=()=>{ $('#rPrev').textContent=body(); };
+  $('#req').addEventListener('input',sync); $('#rZone').addEventListener('change',sync); sync();
   function valid(){ const e=$('#rErr'); let m='';
-    if(!$('#rSong').value.trim()) m='Add the song title.'; else if(!zone.value) m='Choose a section.';
+    if(!ok(vid($('#rLink').value))) m='Paste a YouTube link, like youtube.com/watch?v=… or youtu.be/…'; else if(!$('#rZone').value) m='Choose a section.';
     e.textContent=m; e.hidden=!m; return !m; }
-  $('#req').addEventListener('submit',ev=>{ ev.preventDefault(); if(!valid()) return;
-    location.href=`sms:${NUM}?&body=${encodeURIComponent(body())}`; });
+  $('#req').addEventListener('submit',ev=>{ ev.preventDefault(); if(!valid()) return; location.href=`sms:${NUM}?&body=${encodeURIComponent(body())}`; });
   $('#rCopy').addEventListener('click',async()=>{ if(!valid()) return; const b=$('#rCopy');
     try{ await navigator.clipboard.writeText(body()); b.textContent='Copied: paste into a text to 520-222-8104'; }
     catch(e){ b.textContent='Select the text below and copy it'; }

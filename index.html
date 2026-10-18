@@ -234,6 +234,14 @@ footer p{margin:0}
 #installBtn{border-color:var(--green);color:var(--green)}
 #modeBtn.on{background:var(--gold);border-color:var(--gold);color:var(--on-acc)}
 .card.bk .pad .dur{background:var(--green);color:var(--on-acc)}
+.bottom{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;padding-top:24px}
+.adwarn{display:grid;gap:6px;align-content:start;padding:12px 14px;border:2px solid var(--red);border-radius:10px;background:var(--boards)}
+.adwarn>b{font-family:var(--f-data);font-size:1.15rem;color:var(--red)}
+.adwarn a{font-family:var(--f-data);font-weight:700;color:var(--blue)}
+.reqf{display:grid;gap:8px;align-content:start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--boards)}
+.reqh{font-family:var(--f-data);font-size:1.15rem}
+.reqf input,.reqf select{font:inherit;font-size:1rem;color:var(--ink);background:var(--ice);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;width:100%}
+.reqf .btn{justify-self:start}
 @media (prefers-reduced-motion:reduce){.pad{transition:none}}
 </style>
 </head>
@@ -266,12 +274,6 @@ footer p{margin:0}
       </details>
     </div>
   </header>
-
-  <div class="banner" id="adNote" hidden>
-    <span><b>Ads may play in this browser.</b> For no ads, run the board in Chrome on an Android phone or laptop, signed in to YouTube Premium.</span>
-    <a class="btn on" href="help.html#ads">How to avoid ads</a>
-    <button class="btn" id="adX" type="button">Got it</button>
-  </div>
 
   <div class="banner" id="banner" hidden>
     <span id="bText">Load the cuts and added songs from this link?</span>
@@ -333,9 +335,29 @@ footer p{margin:0}
     <div class="screen"><div id="player"></div></div>
   </section>
 
+  <section class="bottom" aria-label="Ads and song requests">
+    <div class="adwarn" id="adNote">
+      <b>Avoid ads: use Chrome, signed in to YouTube Premium</b>
+      <span id="adMine" hidden><b>You're on an iPhone, iPad, Safari or Firefox, so YouTube ads may play here.</b></span>
+      <span>Run the board in Chrome on an Android phone or a laptop, signed in to youtube.com with YouTube Premium. iPhones (every browser, including Chrome), Safari and Firefox can play ads even with Premium.</span>
+      <a href="help.html#ads">How to avoid ads &rsaquo;</a>
+    </div>
+    <form class="reqf" id="rq" novalidate>
+      <b class="reqh">Request a song</b>
+      <span class="hint">Paste the song's YouTube link and pick a section. It opens a text to 520-222-8104.</span>
+      <input id="rqUrl" type="url" inputmode="url" autocomplete="off" placeholder="YouTube link, e.g. https://youtu.be/&hellip;" aria-label="YouTube link">
+      <select id="rqZone" aria-label="Section">
+        <option value="">Which section?</option>
+        <option>Goal Songs</option><option>Hype</option><option>Crowd</option><option>Penalties</option><option>Whistles</option><option>Period Breaks</option>
+      </select>
+      <p class="err" id="rqErr" hidden></p>
+      <button class="btn on" type="submit">Request this song</button>
+    </form>
+  </section>
+
   <footer>
     <p><a href="help.html"><b>How to use the board, avoid ads, and request a song &rsaquo;</b></a></p>
-    <p><b>Before the game:</b> install the board (Tools › Offline &amp; install) so it opens even with no signal, load your own music files so the key pads play offline (green pill = plays offline), and run Tools › Pre-game check on the phone you'll use. Offside and Icing fall back to built-in backup sounds when the signal fails; the Offline button at the top makes them (and every green pad) instant and skips YouTube. Turn on Do Not Disturb so texts don't go over the speakers. On iPhone, flip off silent mode.</p>
+    <p><b>Before the game:</b> install the board (Tools › Offline &amp; install) so it opens even with no signal, load your own music files so the key pads play offline (green pill = plays offline), and run Tools › Pre-game check on the phone you'll use. Offside and Icing fall back to built-in backup sounds when the signal fails; the Offline button at the top makes them (and every green pad) instant and skips YouTube. Silence calls and texts without muting the board: on Android, Do Not Disturb mutes media unless you allow <b>Media sounds</b> (see <a href="help.html#quiet">how</a>), or just turn the Ring and Notification volume down and leave Media up. On iPhone, flip off silent mode.</p>
     <p>Game cues run 3 to 30 seconds. Period-break songs play the whole song unless you set an end, and Auto-play keeps the next break song coming until you hit Stop.</p>
     <p>"Synced lyrics" cuts are placed from the exact second each line is sung on the album recording; "cue list" cuts start where a published arena cue list puts the hook; "est." cuts are starting guesses to check by ear with Set cut. Tap a section title to fold it away. "Open as YouTube playlist" opens that section's songs as one playlist on YouTube, where songs play in full rather than as cuts. Your saved cuts live in this browser; Share setup copies them to another phone or laptop. On a keyboard, the key on each pad plays it, Space stops, / jumps to search, and the right arrow skips to the next break song.</p>
   </footer>
@@ -1013,8 +1035,13 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 netUI(); installUI();
 /* ads notice: YouTube can only see a Premium sign-in where the browser allows its cookies inside other sites (Chrome on Android/desktop) */
 try{ const ua=navigator.userAgent, chromium=!!(navigator.userAgentData&&navigator.userAgentData.brands.some(b=>/Chromium|Chrome/.test(b.brand)))||/Chrome\/\d/.test(ua);
-  if((IOS||!chromium)&&load('rbc-adnote',false)!==true){ $('#adNote').hidden=false; }
-  $('#adX').addEventListener('click',()=>{ $('#adNote').hidden=true; save('rbc-adnote',true); }); }catch(e){}
+  if(IOS||!chromium) $('#adMine').hidden=false; }catch(e){}
+/* song request: YouTube link + section, sent as a text */
+$('#rq').addEventListener('submit',e=>{ e.preventDefault(); const err=$('#rqErr'), r=vidFrom($('#rqUrl').value), z=$('#rqZone').value; let m='';
+  if(!r||!/^[\w-]{11}$/.test(r.id)) m='Paste a YouTube link, like youtube.com/watch?v=… or youtu.be/…'; else if(!z) m='Pick a section.';
+  err.textContent=m; err.hidden=!m; if(m) return;
+  const t=parseInt(r.t,10), body=`Rink Board song request\nSection: ${z}\nLink: https://youtu.be/${r.id}${t>0?'?t='+t:''}`;
+  location.href=`sms:+15202228104?&body=${encodeURIComponent(body)}`; });
 try{ const c=document.createElement('canvas'); c.width=c.height=180; const g=c.getContext('2d'), k=180/512;
   g.scale(k,k); g.fillStyle='#c8102e'; g.fillRect(0,0,512,512); g.fillStyle='#fff'; g.font='700 150px Arial,Helvetica,sans-serif'; g.textAlign='center'; g.fillText('RB',256,216);
   g.fillStyle='#0a1321'; g.beginPath(); g.ellipse(256,340,150,40,0,0,Math.PI*2); g.fill(); g.fillRect(106,262,300,78);
