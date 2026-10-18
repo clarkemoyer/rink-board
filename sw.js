@@ -1,6 +1,6 @@
 /* Rink Board offline cache: the app opens with no signal. Songs from YouTube still need internet. */
-const V = 'rink-board-v11';
-const CORE = ['./', './index.html', './manifest.webmanifest'];
+const V = 'rink-board-v12';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap';
 
 self.addEventListener('install', e => {
